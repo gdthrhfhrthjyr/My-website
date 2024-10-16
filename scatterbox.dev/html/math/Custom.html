@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Math Questions</title>
+    <style>
+                body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            text-align: center;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        input[type="number"] {
+            width: 100px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            font-size: 1em;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customize Math Questions</h1>
+        <form id="customForm">
+            <div class="form-group">
+                <h2>Operations</h2>
+                <label><input type="checkbox" name="addition" checked> Addition (+)</label>
+                <label><input type="checkbox" name="subtraction"> Subtraction (-)</label>
+                <label><input type="checkbox" name="multiplication"> Multiplication (×)</label>
+                <label><input type="checkbox" name="division"> Division (÷)</label>
+            </div>
+
+            <div class="form-group">
+                <h2>Number Range</h2>
+                <label>Minimum: <input type="number" name="min" value="1" min="1"></label>
+                <label>Maximum: <input type="number" name="max" value="10" min="5"></label>
+            </div>
+
+            <button type="submit">Start Practice</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('customForm');
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+        const minInput = form.querySelector('input[name="min"]');
+        const maxInput = form.querySelector('input[name="max"]');
+
+        // Ensure at least one checkbox is checked
+        function ensureOneChecked() {
+            const checked = Array.from(checkboxes).some(cb => cb.checked);
+            if (!checked) {
+                form.querySelector('input[name="addition"]').checked = true;
+            }
+        }
+
+        // Add event listeners to all checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', ensureOneChecked);
+        });
+
+        // Ensure min and max values are valid
+        function validateMinMax() {
+            let min = parseInt(minInput.value);
+            let max = parseInt(maxInput.value);
+
+            min = Math.max(min, 1);
+            max = Math.max(max, 5);
+
+            if (min > max) {
+                [min, max] = [max, min];
+            }
+
+            minInput.value = min;
+            maxInput.value = max;
+        }
+
+        minInput.addEventListener('change', validateMinMax);
+        maxInput.addEventListener('change', validateMinMax);
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ensureOneChecked();
+            validateMinMax();
+
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+
+            for (const [key, value] of formData.entries()) {
+                if (value === 'on' || (key === 'min' || key === 'max')) {
+                    params.append(key, value);
+                }
+            }
+
+            window.location.href = 'questions_Custom.html?' + params.toString();
+        });
+    </script>
+</body>
+</html>

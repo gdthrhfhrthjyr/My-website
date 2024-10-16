@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Leaderboard</title>
+  <style>
+    body {
+      font-family: 'Comic Neue';
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .leaderboard {
+      max-width: 600px;
+      width: 100%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .leaderboard-title {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .leaderboard-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .leaderboard-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .username {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .score {
+      background: #4caf50;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="leaderboard">
+    <div class="leaderboard-title">Math Challenge Leaderboard Top 10</div>
+    <ul class="leaderboard-list" id="leaderboard-list">
+      <!-- Leaderboard items will be dynamically populated here -->
+    </ul>
+  </div>
+  <script>
+    function updateLeaderboard(data) {
+      const leaderboardList = document.getElementById('leaderboard-list');
+      leaderboardList.innerHTML = ''; // Clear the list
+      data.leaderboard.forEach((player, index) => {
+        let position = index + 1;
+        let positionDisplay = position <= 3 ? ['🥇', '🥈', '🥉'][index] : position;
+        
+        const listItem = document.createElement('li');
+        listItem.classList.add('leaderboard-list-item');
+        listItem.innerHTML = `
+          <span class="username">${positionDisplay}. ${player.username}</span>
+          <span class="score">${player.points}</span>
+        `;
+        leaderboardList.appendChild(listItem);
+      });
+    }
+
+    fetch('https://scatterbox.dev/api/math/leaderboard')
+      .then(response => response.json())
+      .then(data => updateLeaderboard(data))
+      .catch(error => console.error('Error fetching leaderboard:', error));
+  </script>
+</body>
+</html>

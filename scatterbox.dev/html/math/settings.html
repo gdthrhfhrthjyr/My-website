@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Settings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f0f0f0;
+    }
+
+    #settings-label {
+      margin-top: 20px;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      width: 400px;
+      padding: 20px;
+      background: #ffffff;
+      color: #333;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    #overlay {
+      position: fixed;
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 5;
+    }
+
+    .button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #close-btn, #close-btn-password {
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.2em;
+      color: #333;
+    }
+
+    .input-field {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .confirm-btn {
+      padding: 10px 20px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+      margin-top: 10px;
+    }
+
+    .cf-turnstile {
+      margin-bottom: 10px;
+    }
+  </style>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+
+<body>
+  <div id="overlay"></div>
+  <label id="settings-label" style="font-size: 2em;">Settings</label>
+  <button id="name-change-btn" class="button">Change Username</button>
+  <button id="password-change-btn" class="button">Change Password</button>
+  <script>
+    window.addEventListener('load', function() {
+      if (sessionStorage.getItem('mfa_enabled') === 'false') {
+        var add2faBtn = document.createElement('button');
+        add2faBtn.id = 'add-2fa-btn';
+        add2faBtn.className = 'button';
+        add2faBtn.textContent = 'Add 2FA';
+        add2faBtn.onclick = function() {
+          window.location.href = 'add-2fa.html';
+        };
+        document.body.appendChild(add2faBtn);
+      } else if (sessionStorage.getItem('mfa_enabled') === 'true') {
+        var remove2faBtn = document.createElement('button');
+        remove2faBtn.id = 'remove-2fa-btn';
+        remove2faBtn.className = 'button';
+        remove2faBtn.textContent = 'Remove 2FA';
+        remove2faBtn.onclick = function() {
+          window.location.href = 'remove-2fa.html';
+        };
+        document.body.appendChild(remove2faBtn);
+      }
+    });
+  </script>
+
+  <div id="change-username-popup" class="popup">
+    <span id="close-btn">×</span>
+    <input type="text" class="input-field" id="new-username" placeholder="New Username">
+    <input type="password" class="input-field" id="password" placeholder="Password">
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAAAxE2R6Z0zwKgFG4" data-theme="light"></div> <!-- Move Turnstile widget here -->
+    <button id="confirm-btn" class="confirm-btn">Confirm</button>
+  </div>
+
+  <div id="change-password-popup" class="popup">
+    <span id="close-btn-password">×</span>
+    <input type="password" class="input-field" id="old-password" placeholder="Old Password">
+    <input type="password" class="input-field" id="new-password" placeholder="New Password">
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAAAxE2R6Z0zwKgFG4" data-theme="light"></div> <!-- Move Turnstile widget here -->
+    <button id="confirm-password-btn" class="confirm-btn">Confirm</button>
+  </div>
+
+  <script>
+    var popup = document.getElementById('change-username-popup');
+    var passwordPopup = document.getElementById('change-password-popup');
+    var overlay = document.getElementById('overlay');
+
+    // Open the username change popup and overlay
+    document.getElementById('name-change-btn').addEventListener('click', function () {
+      popup.style.display = 'block';
+      overlay.style.display = 'block';
+      document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+    });
+
+    // Open the password change popup and overlay
+    document.getElementById('password-change-btn').addEventListener('click', function () {
+      passwordPopup.style.display = 'block';
+      overlay.style.display = 'block';
+      document.body.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+    });
+
+    // Close the popup and overlay
+    function closePopup() {
+      popup.style.display = 'none';
+      passwordPopup.style.display = 'none';
+      overlay.style.display = 'none';
+      document.body.style.backgroundColor = '#ffffff';
+    }
+
+    document.getElementById('close-btn').addEventListener('click', closePopup);
+    document.getElementById('close-btn-password').addEventListener('click', closePopup);
+
+    // Confirm username change
+    document.getElementById('confirm-btn').addEventListener('click', function () {
+      var newUsername = document.getElementById('new-username').value;
+      var password = document.getElementById('password').value;
+      var userID = sessionStorage.getItem('user_id');
+      var sessionToken = sessionStorage.getItem('session_token');
+      var encryptedToken = sessionStorage.getItem('encrypted_token');
+      var turnstileToken = window.turnstile.getResponse();
+      
+      if (!turnstileToken) {
+        alert('Please complete the verification.');
+        return;
+      }
+
+      var headers = new Headers();
+      headers.append('new-username', newUsername);
+      headers.append('password', password);
+      headers.append('user-id', userID);
+      headers.append('session-token', sessionToken);
+      headers.append('encrypted-token', encryptedToken);
+      headers.append('CF-Turnstile-Token', turnstileToken); // Add Turnstile token
+
+      fetch('https://scatterbox.dev/api/math/change-name', {
+        method: 'PUT',
+        headers: headers
+      })
+        .then(function (response) {
+          if (response.status === 200) {
+            alert('Username successfully changed.');
+            window.location.reload();
+          } else if (response.status === 401) {
+            alert('Password is incorrect.');
+            window.location.reload();
+          } else {
+            alert('An unknown error has occurred.');
+            window.location.reload();
+          }
+        })
+        .catch(function (error) {
+          console.error('Error:', error);
+          alert('An error occurred. Please try again.');
+        });
+      closePopup();
+    });
+
+    // Confirm password change
+    document.getElementById('confirm-password-btn').addEventListener('click', function () {
+      var oldPassword = document.getElementById('old-password').value;
+      var newPassword = document.getElementById('new-password').value;
+      var userID = sessionStorage.getItem('user_id');
+      var turnstileToken = window.turnstile.getResponse();
+      
+      if (!turnstileToken) {
+        alert('Please complete the verification.');
+        return;
+      }
+
+      var headers = new Headers();
+      headers.append('old-password', oldPassword);
+      headers.append('new-password', newPassword);
+      headers.append('user-id', userID);
+      headers.append('session-token', sessionStorage.getItem('session_token'));
+      headers.append('encrypted-token', sessionStorage.getItem('encrypted_token'));
+      headers.append('CF-Turnstile-Token', turnstileToken); // Add Turnstile token
+
+      fetch('https://scatterbox.dev/api/math/change-password', {
+        method: 'PUT',
+        headers: headers
+      })
+        .then(function (response) {
+          if (response.status === 200) {
+            alert('Password successfully changed.');
+            window.location.reload();
+          } else if (response.status === 401) {
+            alert('Old password is incorrect.');
+            window.location.reload();
+          } else {
+            alert('An unknown error has occurred.');
+            window.location.reload();
+          }
+        })
+        .catch(function (error) {
+          console.error('Error:', error);
+          alert('An error occurred. Please try again.');
+        });
+      closePopup();
+    });
+  </script>
+</body>
+
+</html>

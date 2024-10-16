@@ -1,0 +1,14 @@
+# Ignore all log files in any directory
+**/*.log
+
+# Ignore all pyc files in any directory
+**/*.pyc
+
+# Ignore all JSON files in any directory
+**/*.json
+
+# Ignore Deploy.sh
+Deploy.sh
+
+# Ignore fn
+Future_nature.scatterbox.dev

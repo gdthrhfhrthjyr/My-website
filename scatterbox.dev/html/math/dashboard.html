@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      position: relative; /* Needed for absolute positioning of the settings icon */
+    }
+    
+    
+    .difficulty-selector {
+      text-align: center;
+      float: right; /* Shift the button to the right */
+    }
+
+    .difficulty-button {
+      font-size: 1.5em; /* Make text larger */
+      padding: 20px 40px; /* Increase padding */
+      margin: 15px; /* Add some space between buttons */
+      right: 10px;
+      border: none;
+      border-radius: 5px; /* Adjust border-radius like the other buttons */
+      cursor: pointer;
+      transition: transform 0.1s; /* Smooth transform transition */
+    }
+
+    .difficulty-button:hover {
+      transform: scale(1.05); /* Button grow effect on hover */
+    }
+
+    #easy {
+      background-color: #4CAF50; /* Green */
+    }
+
+    #medium {
+      background-color: #FFEB3B; /* Yellow */
+    }
+
+    #hard {
+      background-color: #F44336; /* Red */
+    }
+
+    #Custom {
+      background-color: purple;
+    }
+
+    .leaderboard-button {
+      background-color: #008CBA; /* Blue */
+      margin-top: 20px; /* Maintain some spacing from the difficulty buttons */
+    }
+
+    #difficulty-label {
+      font-size: 2em; /* Larger label text */
+      margin-bottom: 20px; /* Space below label */
+    }
+
+    /* Added styles for settings icon */
+    #settings-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      transition: transform 0.5s ease; /* 0.5 second rotation when hovered */
+      cursor: pointer;
+    }
+
+    #settings-icon:hover {
+      transform: rotate(360deg);
+    }
+
+    /* Achievements image button in the top right corner */
+    #achievements-image {
+      position: absolute;
+      top: 10px;
+      right: 50px; /* Adjust right position to place image in top right corner */
+      cursor: pointer;
+    }
+    #Admin {
+      display: none; /* Initial state, hidden */
+      border-radius: 5px;
+      right: 90px; /* Adjust to place next to the other buttons */
+      top: 5px;
+      border: none;
+      cursor: pointer;
+      position: absolute;
+      padding: 5px 5px; /* Increase padding */
+    }
+    #Admin:hover, #achievements-image:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="difficulty-selector">
+    <div id="difficulty-label">Choose difficulty:</div>
+    <button id="easy" class="difficulty-button">Easy</button>
+    <button id="medium" class="difficulty-button">Medium</button>
+    <button id="hard" class="difficulty-button">Hard</button>
+    <button id="Custom" class="difficulty-button">Custom difficulty</button>    
+    <button id="leaderboard" class="difficulty-button leaderboard-button">Leaderboard</button>
+  </div>
+  <img src="admin.png" id="Admin" alt="Admin panel" width="32" height="32"> <!-- Changed to an image button -->
+  <img src="icon.png" id="achievements-image" alt="Achievements" width="32" height="32">
+  <img src="https://static-00.iconduck.com/assets.00/settings-icon-1964x2048-8nigtrtt.png" id="settings-icon" alt="Settings" width="32" height="32">
+
+  <script>
+    document.getElementById('easy').addEventListener('click', function() {
+      window.location.href = '/math/easy.html';
+    });
+    document.getElementById('medium').addEventListener('click', function() {
+      window.location.href = '/math/medium.html';
+    });
+    document.getElementById('hard').addEventListener('click', function() {
+      window.location.href = '/math/hard.html';
+    });
+    document.getElementById('Custom').addEventListener('click', function() {
+      window.location.href = '/math/Custom.html';
+    });
+    document.getElementById('leaderboard').addEventListener('click', function() {
+      window.location.href = '/math/leaderboard.html';
+    });
+
+    // Added event listener for settings icon
+    document.getElementById('settings-icon').addEventListener('click', function() {
+      window.location.href = '/math/settings.html';
+    });
+    document.getElementById('achievements-image').addEventListener('click', function() {
+      window.location.href = '/math/Achievements.html';
+    });
+
+    // Check if the user is a moderator and if so, show the admin button
+    if(sessionStorage.getItem('is_mod') === 'true') {
+      document.getElementById('Admin').style.display = 'block';
+    }
+
+    document.getElementById('Admin').addEventListener('click', function() {
+      if(sessionStorage.getItem('is_mod') === 'true') {
+        window.location.href = '/math/admin.html'; // Assuming the admin panel is named admin.html, change as needed
+      }
+    });
+  </script>
+</body>
+</html>

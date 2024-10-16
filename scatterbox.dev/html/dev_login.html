@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Login</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 320px;
+            margin: 100px auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        input {
+            border: 1px solid #ccc;
+            border-radius: 4px; /* Ensuring input has rounded corners */
+            box-sizing: border-box; /* Ensuring padding and border are included in width */
+        }
+        button {
+            background-color: #5c67f2;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: none; /* Ensuring button has no border */
+            box-sizing: border-box; /* Ensuring padding and border are included in width */
+        }
+        button:hover {
+            background-color: #4a54e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Developer Login</h2>
+        <input type="text" id="apiKeyInput" placeholder="Enter API Key" required>
+        <button onclick="verifyApiKey()">Login</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        function verifyApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value;
+            fetch('/api/verify-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'API-Key': apiKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "API Key is valid") {
+                    sessionStorage.setItem('devApiKey', apiKey);
+                    document.getElementById('message').textContent = 'Login successful!';
+                    window.location.href = '/dev.html'; // Redirect to dev.html
+                } else {
+                    document.getElementById('message').textContent = 'Invalid API Key.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'An error occurred.';
+            });
+        }
+    </script>
+</body>
+</html>
+

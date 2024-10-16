@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Dark background */
+            color: #e0e0e0; /* Light text */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+            width: 100%;
+        }
+
+        .container h1 {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+            color: #ffffff; /* Bright white text for headings */
+        }
+
+        .container p {
+            font-size: 1.2em;
+            margin-bottom: 1em;
+            color: #cccccc; /* Slightly dimmer text for paragraphs */
+        }
+
+        .container .emoji {
+            font-size: 30vh; /* Adjust size relative to viewport height */
+            color: rgba(255, 255, 255, 0.1); /* Light emoji with low opacity */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .container .message {
+            z-index: 1;
+        }
+
+        @media (max-width: 600px) {
+            .container h1 {
+                font-size: 2em; /* Smaller font size for smaller devices */
+            }
+
+            .container p {
+                font-size: 1em; /* Smaller font size for paragraphs on smaller devices */
+            }
+
+            .container .emoji {
+                font-size: 40vh; /* Larger emoji on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">⚒️</div>
+        <div class="message">
+            <h1>We'll be back soon!</h1>
+            <p>Sorry for the inconvenience but we're performing some maintenance at the moment. We'll be back online shortly. For any questions or inquiries please contact us at <a href="mailto:development@scatterbox.dev">development@scatterbox.dev</a>!</p>
+        </div>
+    </div>
+</body>
+</html>

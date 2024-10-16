@@ -1,0 +1,27 @@
+/* Add this code to the existing style.css file */
+
+body, html {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  text-align: center;
+}
+
+.login-container h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.login-container button {
+  display: block;
+  width: 200px;
+  padding: 10px;
+  margin: 10px auto;
+  font-size: 18px;
+  cursor: pointer;
+}

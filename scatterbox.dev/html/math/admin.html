@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .login-container {
+            width: 400px;
+            padding: 40px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        #submit-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .turnstile-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Admin Login</h1>
+        <input type="text" id="username" class="input-field" placeholder="Username">
+        <input type="password" id="password" class="input-field" placeholder="Password">
+        <div class="turnstile-container">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAAxE2R6Z0zwKgFG4" data-theme="light"></div>
+        </div>
+        <button id="submit-btn">Submit</button>
+    </div>
+
+    <script>
+        // Check if API key exists in session storage
+        const storedApiKey = sessionStorage.getItem('API_Key');
+        if (storedApiKey) {
+            // If API key exists, skip login and redirect to admin panel
+            window.location.href = '/math/adminpanel.html';
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            // Retrieve Turnstile token
+            var turnstileToken = window.turnstile.getResponse();
+            
+            if (!turnstileToken) {
+                alert('Please complete the verification.');
+                return;
+            }
+
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            var headers = new Headers();
+            headers.append('username', username);
+            headers.append('password', password);
+            headers.append('session-token', sessionStorage.getItem('session_token'));
+            headers.append('encrypted-token', sessionStorage.getItem('encrypted_token'));
+            headers.append('CF-Turnstile-Token', turnstileToken); // Include Turnstile token
+
+            fetch('https://scatterbox.dev/api/math/get_api_key', {
+                method: 'GET',
+                headers: headers
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    alert('Invalid credentials. Please try again.');
+                    throw new Error('Unauthorized');
+                }
+                return response.json();
+            })
+            .then(data => {
+                sessionStorage.setItem('API_Key', data.API_Key);
+                window.location.href = '/math/adminpanel.html';
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Management Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            height: 100vh;
+        }
+        .container {
+            width: 80%;
+            padding: 20px;
+            margin-top: 50px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            background-color: #f4f4f9;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Site Management Panel</h1>
+        <button onclick="toggleMaintenance(true)">Enable Maintenance Mode</button>
+        <button onclick="toggleMaintenance(false)">Disable Maintenance Mode</button>
+        <button onclick="bypassMaintenance()">Bypass Maintenance Mode</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const devApiKey = sessionStorage.getItem('devApiKey');
+            if (!devApiKey) {
+                window.location.href = '/dev_login.html';
+            }
+        };
+
+        function toggleMaintenance(enable) {
+            const apiKey = sessionStorage.getItem('devApiKey');
+            const endpoint = enable ? '/api/lock-site' : '/api/unlock-site';
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'API-Key': apiKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('message').textContent = data.message || data.error;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'An error occurred.';
+            });
+        }
+
+        function bypassMaintenance() {
+            // Start of Selection
+                // Start of Selection
+                document.cookie = "bypass_maintenance=1; path=/; max-age=3600; secure; samesite=Strict";
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

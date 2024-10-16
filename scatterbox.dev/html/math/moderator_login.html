@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Moderator Login Page</title>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      width: 300px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      background: #FFFFFF;
+    }
+
+    .login-container h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .login-container input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .login-container button {
+      display: block;
+      width: 200px;
+      padding: 10px;
+      margin: 10px auto;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Moderator Login</h1>
+    <p id="login-status"></p>
+  </div>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    setTimeout(function() {
+      // The rest of the code will execute after a 3-second delay
+    }, 3000);
+    const loginKey = urlParams.get('key');
+
+    if (loginKey) {
+      console.log(loginKey)
+      fetch(`https://scatterbox.dev/api/math/verify_moderator_login_key?key=${encodeURIComponent(loginKey)}`, {
+        method: 'GET'
+      })
+      .then(function(response) {
+        if (response.ok) { // check if the response status is within the 200-299 range
+          return response.json(); // parse the JSON body of the response
+        } else {
+          // Handle HTTP errors
+          document.getElementById('login-status').textContent = 'Invalid login key';
+          throw new Error('Invalid response');
+        }
+      })
+      .then(function(data) {
+        // Store user ID and points in session storage and redirect to dashboard
+        sessionStorage.setItem('user_id', data.user_id);
+        sessionStorage.setItem('points', data.points);
+        sessionStorage.setItem('is_mod', data.is_mod);
+        sessionStorage.setItem('encrypted_token', data.encrypted_token);
+        sessionStorage.setItem('session_token', data.session_token);
+        window.location.href = '/math/dashboard.html'; // Redirect to the dashboard page
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+      });
+    } else {
+      console.error('No login key provided');
+    }
+  </script>
+</body>
+</html>

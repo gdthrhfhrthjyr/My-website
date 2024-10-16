@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="RocketCake">
+    <title>Community Projects</title>
+    <link rel="stylesheet" href="../index_html.css">
+    <style>
+        a { color:#B2B3B4; } 
+        a:visited { color:#B2B3B4; } 
+        a:active { color:#5C615E; } 
+        a:hover { color:#5D5D9E; } 
+        h1, h2, p, .project-button { color: white; }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/community-projects')
+                .then(response => response.json())
+                .then(data => {
+                    const featuredProjects = data.featured_projects;
+                    const communityProjects = data.community_projects;
+
+                    const featuredContainer = document.getElementById('featured-projects');
+                    const communityContainer = document.getElementById('community-projects');
+
+                    featuredProjects.forEach(project => {
+                        const projectElement = document.createElement('div');
+                        projectElement.className = 'project';
+                        projectElement.innerHTML = `<a href="/community-projects/${project}" class="project-button">${project}</a>`;
+                        featuredContainer.appendChild(projectElement);
+                    });
+
+                    communityProjects.forEach(project => {
+                        const projectElement = document.createElement('div');
+                        projectElement.className = 'project';
+                        projectElement.innerHTML = `<a href="/community-projects/${project}" class="project-button">${project}</a>`;
+                        communityContainer.appendChild(projectElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching projects:', error));
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1 class="site-title"><strong>scatterbox.dev</strong></h1>
+        <h2 class="subtitle">Featured Community Projects🔥🔥🔥</h2>
+    </header>
+    
+    <main>
+        <div class="projects-container" id="featured-projects"></div>
+        <h2 class="subtitle">Community Projects</h2>
+        <div class="projects-container" id="community-projects"></div>
+    </main>
+
+    <footer>
+        <p class="credit"><span style="display:none;">Credit to radim776 for making the page</span><span style="display:inline;">Credit to radim776 for making the page</span></p>
+    </footer>
+</body>
+</html>

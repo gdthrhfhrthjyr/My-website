@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Login Page</title>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      width: 300px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      background: #FFFFFF;
+    }
+
+    .login-container h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .login-container input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .login-container button {
+      display: block;
+      width: 200px;
+      padding: 10px;
+      margin: 10px auto;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Login</h1>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="confirm">Confirm</button>
+    <p id="login-status"></p>
+  </div>
+  <script>
+    document.getElementById('confirm').addEventListener('click', function() {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      var headers = new Headers();
+      headers.append('username', username);
+      headers.append('password', password);
+
+      fetch('https://scatterbox.dev/api/math/login', {
+        method: 'POST',
+        headers: headers
+      })
+      .then(function(response) {
+        if (response.ok) { // check if the response status is within the 200-299 range
+          return response.json(); // parse the JSON body of the response
+        } else if (response.status === 601) {
+         sessionStorage.setItem('error', ' This account has been locked by a member of our moderation team please try again later if you think this was a mistake please contact a member of the moderation team')
+          window.location.href = '/math/error.html'; // Redirect to error page
+          throw new error("Account locked")
+        } else if (response.status === 403) {
+          sessionStorage.setItem('password', password)
+          sessionStorage.setItem('username', username)
+          window.location.href = '/math/2fa.html'; // Redirect to 2FA page
+          throw new error("2FA required")
+        } else {
+          document.getElementById('login-status').textContent = 'Invalid username or password';
+          throw new Error('Invalid login');
+        }
+      })
+      .then(function(data) {
+        // Store user ID and points in session storage and redirect to dashboard
+        sessionStorage.setItem('user_id', data.user_id);
+        sessionStorage.setItem('points', data.points);
+        sessionStorage.setItem('is_mod', data.is_mod);
+        sessionStorage.setItem('session_token', data.token); // Store the session token
+        sessionStorage.setItem('encrypted_token', data.encrypted_token); // Store the encrypted token
+        sessionStorage.setItem('mfa_enabled', data.mfa_enabled); // Store the mfa enabled status
+        window.location.href = '/math/dashboard.html';
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+      });
+    });
+
+  </script>
+</body>
+</html>

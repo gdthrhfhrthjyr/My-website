@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove 2FA</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 400px; margin: 20px auto; padding: 15px; background-color: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.1); border-radius: 5px; }
+        h1 { text-align: center; color: #333; font-size: 1.5em; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 3px; color: #555; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; }
+        button { width: 100%; padding: 8px; background-color: #28a745; color: #fff; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #message { margin-top: 10px; text-align: center; color: #d9534f; }
+        .token-input { display: flex; justify-content: space-between; margin-top: 5px; }
+        .token-input input { width: 30px; height: 30px; text-align: center; font-size: 16px; }
+        #hidden-input { position: absolute; opacity: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Remove 2FA</h1>
+        <form id="remove-2fa-form">
+            <div class="form-group">
+                <label for="code">2FA code:</label>
+                <div class="token-input">
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" id="hidden-input" maxlength="6" pattern="\d{6}" required>
+                </div>
+            </div>
+            <button type="submit">Remove 2FA</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const hiddenInput = document.getElementById('hidden-input');
+        const displayInputs = document.querySelectorAll('.token-input input:not(#hidden-input)');
+
+        hiddenInput.addEventListener('input', function() {
+            const code = this.value;
+            displayInputs.forEach((input, index) => {
+                input.value = code[index] || '';
+            });
+        });
+
+        document.getElementById('remove-2fa-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userId = sessionStorage.getItem('user_id');
+            const code = hiddenInput.value;
+            const sessionToken = sessionStorage.getItem('session_token');
+            const encryptedToken = sessionStorage.getItem('encrypted_token');
+
+            try {
+                const response = await fetch('/api/math/auth/remove-2fa', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': userId,
+                        'code': code,
+                        'session-token': sessionToken,
+                        'encrypted-token': encryptedToken
+                    }
+                });
+
+                const result = await response.json();
+                document.getElementById('message').innerText = result.message;
+                if (result.message === "2FA removed successfully") {
+                    window.location.href = 'settings.html';
+                    sessionStorage.setItem('mfa_enabled', 'false');
+                }
+            } catch (error) {
+                document.getElementById('message').innerText = 'Error removing 2FA.';
+            }
+        });
+    </script>
+</body>
+</html>

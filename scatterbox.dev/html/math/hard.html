@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Math Challenge - Hard</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Comic Neue', cursive;
+      background-color: #f7f7f7;
+    }
+
+    .math-problem-container {
+      text-align: center;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+      background-color: #ffffff;
+    }
+
+    .math-problem-question {
+      font-size: 1.5em;
+      margin: 20px 0;
+    }
+
+    .answer-input {
+      width: 200px;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      font-size: 1em;
+    }
+
+    #submit-answer {
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #submit-answer:hover {
+      background-color: #45a049;
+    }
+
+    .points-counter {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background-color: #ffeb3b;
+      padding: 10px;
+      border-radius: 20px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="math-problem-container">
+    <div class="math-problem-question" id="math-problem">Loading...</div>
+    <input type="text" class="answer-input" id="user-answer" placeholder="Input answer">
+    <button id="submit-answer">Submit Answer</button>
+    <div class="points-counter" id="points-counter">Points: 0</div>
+    <script>
+      const pointsFromStorage = sessionStorage.getItem('points');
+      const pointsInitialValue = pointsFromStorage ? parseInt(pointsFromStorage) : 0;
+      document.getElementById('points-counter').textContent = `Points: ${pointsInitialValue}`;
+    </script>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let currentQuestionIndex = 0;
+      const pointsCounter = document.getElementById('points-counter');
+      let points = parseInt(sessionStorage.getItem('points') || '0');
+
+      function generateQuestions() {
+        const operations = ['+', '-', '*', '/'];
+        const questions = [];
+        for (let i = 0; i < 10; i++) {
+          const num1 = Math.floor(Math.random() * 100);
+          const num2 = Math.floor(Math.random() * 100);
+          const operation = operations[Math.floor(Math.random() * operations.length)];
+          let question;
+          let answer;
+          switch (operation) {
+            case '+':
+              question = `${num1} + ${num2}`;
+              answer = num1 + num2;
+              break;
+            case '-':
+              question = `${num1} - ${num2}`;
+              answer = num1 - num2;
+              break;
+            case '*':
+              question = `${num1} * ${num2}`;
+              answer = num1 * num2;
+              break;
+            case '/':
+              const divisor = Math.floor(Math.random() * 9) + 1; // Avoid zero
+              question = `${num1} / ${divisor}`;
+              answer = Math.floor(num1 / divisor);
+              break;
+          }
+          questions.push({ question, answer });
+        }
+        return questions;
+      }
+
+      function displayQuestion(index) {
+        const questions = JSON.parse(sessionStorage.getItem('questions'));
+        if (questions && questions[index]) {
+          document.getElementById('math-problem').textContent = questions[index].question;
+          document.getElementById('user-answer').value = ''; // Clear previous answer
+        } else {
+          const newQuestions = generateQuestions();
+          sessionStorage.setItem('questions', JSON.stringify(newQuestions));
+          displayQuestion(index);
+        }
+      }
+
+      function checkAnswer(userAnswer, questionIndex) {
+        const questions = JSON.parse(sessionStorage.getItem('questions'));
+        const correctAnswer = questions[questionIndex].answer;
+        if (parseInt(userAnswer) === correctAnswer) {
+          points++;
+          updatePoints();
+          sessionStorage.setItem('points', points.toString());
+          addPointToServer(5);
+        }
+        else {
+          points = points - 2;
+          updatePoints();
+          sessionStorage.setItem('points', points.toString());
+          addPointToServer(-2);
+        }
+
+        // Move to the next question
+        currentQuestionIndex++;
+        displayQuestion(currentQuestionIndex);
+      }
+
+      function updatePoints() {
+        pointsCounter.textContent = `Points: ${points}`;
+      }
+
+      function addPointToServer(pts_to_add) {
+        const userId = sessionStorage.getItem('user_id');
+        fetch('https://scatterbox.dev/api/math/add-point', {
+          method: 'POST',
+          headers: new Headers({
+            'user-id': userId,
+            'points': pts_to_add,
+            'session-token': sessionStorage.getItem('session_token'),
+            'encrypted-token': sessionStorage.getItem('encrypted_token')
+          }),
+        })
+          .then(response => {
+            if (response.status === 500) {
+              sessionStorage.setItem('error', 'An error has occurred. Please attempt to log in and try again later.');
+              window.location.href = '/error.html';
+            }
+            return response.json();
+          })
+          .then(data => {
+            points = data.points;
+            sessionStorage.setItem('points', points.toString());
+            pointsCounter.textContent = `Points: ${points}`;
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      document.getElementById('submit-answer').addEventListener('click', function () {
+        checkAnswer(document.getElementById('user-answer').value, currentQuestionIndex);
+      });
+
+      document.getElementById('user-answer').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          checkAnswer(document.getElementById('user-answer').value, currentQuestionIndex);
+        }
+      });
+
+      // Initial setup
+      displayQuestion(currentQuestionIndex);
+    });
+  </script>
+</body>
+
+</html>

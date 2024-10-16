@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VPN Access Blocked</title>
+<link href="https://fonts.googleapis.com/css?family=Cabin:400,700" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Montserrat:900" rel="stylesheet">
+<link type="text/css" rel="stylesheet" href="/style.css" />
+<meta name="robots" content="noindex, follow">
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        position: relative;
+        overflow: hidden;
+    }
+    .container {
+        text-align: center;
+        z-index: 1;
+        width: 100%;
+    }
+    .container h1 {
+        font-size: 3em;
+        margin-bottom: 0.5em;
+        color: #ffffff;
+    }
+    .container p {
+        font-size: 1.2em;
+        margin-bottom: 1em;
+        color: #cccccc;
+    }
+    .container .emoji {
+        font-size: 30vh;
+        color: rgba(255, 255, 255, 0.1);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+    }
+    @media (max-width: 600px) {
+        .container h1 {
+            font-size: 2em;
+        }
+        .container p {
+            font-size: 1em;
+        }
+        .container .emoji {
+            font-size: 40vh;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="emoji">🚫</div>
+    <div class="message">
+        <h1>VPN Access Blocked</h1>
+        <p>We're sorry, but access through VPN to this page is not allowed. Please disable your VPN and try again. If you believe this is an error, contact us at <a href="mailto:development@scatterbox.dev">development@scatterbox.dev</a>.</p>
+    </div>
+</div>
+</body>
+</html>

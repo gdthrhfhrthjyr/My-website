@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add 2FA</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 400px; margin: 20px auto; padding: 15px; background-color: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.1); border-radius: 5px; }
+        h1 { text-align: center; color: #333; font-size: 1.5em; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 3px; color: #555; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 3px; }
+        button { width: 100%; padding: 8px; background-color: #28a745; color: #fff; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #message { margin-top: 10px; text-align: center; color: #d9534f; }
+        .token-input { display: flex; justify-content: space-between; margin-top: 5px; }
+        .token-input input { width: 30px; height: 30px; text-align: center; font-size: 16px; }
+        #hidden-input { position: absolute; opacity: 0; }
+        #qr-code { width: 200px; height: 200px; margin: 10px auto; display: block; }
+        .cf-turnstile { margin: 10px 0; }
+    </style>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Add Two-Factor Authentication</h1>
+        <form id="add-2fa-form">
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="button" id="generate-2fa-btn">Generate 2FA</button>
+        </form>
+        <div id="2fa-section" style="display:none;">
+            <p>Scan the QR code with your authenticator app and enter the generated code below:</p>
+            <img id="qr-code" src="" alt="QR Code">
+            <div class="form-group">
+                <label for="code">2FA code:</label>
+                <div class="token-input">
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" maxlength="1" pattern="\d" required readonly>
+                    <input type="text" id="hidden-input" maxlength="6" pattern="\d{6}" required>
+                </div>
+            </div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAAxE2R6Z0zwKgFG4" data-theme="light"></div>
+            <button type="button" id="confirm-2fa-btn">Confirm</button>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const hiddenInput = document.getElementById('hidden-input');
+        const displayInputs = document.querySelectorAll('.token-input input:not(#hidden-input)');
+
+        hiddenInput.addEventListener('input', function() {
+            const code = this.value;
+            displayInputs.forEach((input, index) => {
+                input.value = code[index] || '';
+            });
+        });
+
+        // Check if a QR code is already stored in session storage
+        if (sessionStorage.getItem('qrcode')) {
+            document.getElementById('2fa-section').style.display = 'block';
+            document.getElementById('qr-code').src = sessionStorage.getItem('qrcode');
+            document.getElementById('add-2fa-form').style.display = 'none';
+        }
+
+        document.getElementById('generate-2fa-btn').addEventListener('click', function () {
+            var password = document.getElementById('password').value;
+
+            if (password) {
+                fetch('/api/math/auth/generate-2fa', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'password': password,
+                        'user-id': sessionStorage.getItem('user_id'),
+                        'Session-Token': sessionStorage.getItem('session_token'),
+                        'encrypted-token': sessionStorage.getItem('encrypted_token')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.qrcode) {
+                        document.getElementById('message').innerText = '2FA generated successfully!';
+                        document.getElementById('2fa-section').style.display = 'block';
+                        document.getElementById('qr-code').src = data.qrcode;
+                        document.getElementById('add-2fa-form').style.display = 'none';
+                        
+                        // Store the QR code in session storage
+                        sessionStorage.setItem('qrcode', data.qrcode);
+                    } else {
+                        document.getElementById('message').innerText = 'Failed to generate 2FA: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').innerText = 'An error occurred while generating 2FA.';
+                });
+            } else {
+                document.getElementById('message').innerText = 'Please enter your password.';
+            }
+        });
+
+        document.getElementById('confirm-2fa-btn').addEventListener('click', function () {
+            var token = hiddenInput.value;
+            var turnstileToken = window.turnstile.getResponse();
+                
+            if (!turnstileToken) {
+                document.getElementById('message').innerText = 'Please complete the verification.';
+                return;
+            }
+
+            if (token && turnstileToken) {
+                fetch('/api/math/auth/activate-2fa', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': sessionStorage.getItem('user_id'),
+                        'Session-Token': sessionStorage.getItem('session_token'),
+                        'encrypted-token': sessionStorage.getItem('encrypted_token'),
+                        'code': token,
+                        'CF-Turnstile-Token': turnstileToken
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        turnstileToken: turnstileToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === "2FA activated successfully") {
+                        document.getElementById('message').innerText = '2FA added successfully!';
+                        sessionStorage.setItem('mfa_enabled', 'true');
+                        
+                        // Remove the QR code from session storage
+                        sessionStorage.removeItem('qrcode');
+                        
+                        setTimeout(() => {
+                            window.location.href = '/math/settings.html';
+                        }, 2000);
+                    } else {
+                        document.getElementById('message').innerText = 'Failed to add 2FA: ' + data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').innerText = 'An error occurred while adding 2FA.';
+                });
+            } else {
+                document.getElementById('message').innerText = 'Please enter the token and complete the Turnstile verification.';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Achievements</title>
+  <style>
+    body {
+      font-family: 'Comic Neue';
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .achievements {
+      max-width: 600px;
+      width: 100%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .achievements-title {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .achievements-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .achievements-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .achievement {
+      font-weight: bold;
+      color: #333;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="achievements">
+    <div class="achievements-title">My Achievements</div>
+    <ul class="achievements-list" id="achievements-list">
+      <!-- Achievements items will be dynamically populated here -->
+    </ul>
+  </div>
+  <script>
+      const userId = sessionStorage.getItem('user_id');
+      fetch('https://scatterbox.dev/api/math/user-achievements', {
+          method: 'GET',
+          headers: {
+              'user-id': userId,
+                'session-token': sessionStorage.getItem('session_token'),
+                'encrypted-token': sessionStorage.getItem('encrypted_token')
+            }
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Failed to fetch achievements');
+          }
+          return response.json();
+      })
+      .then(data => {
+          const achievementsList = document.getElementById('achievements-list');
+          achievementsList.innerHTML = ''; // Clear the list
+          data.achievements.forEach((achievement, index) => {
+              const formattedAchievement = achievement.replace(/_/g, ' '); // Replace underscores with spaces
+              const listItem = document.createElement('li');
+              listItem.classList.add('achievements-list-item');
+              listItem.innerHTML = `
+                  <span class="achievement">${formattedAchievement}</span>
+              `;
+              achievementsList.appendChild(listItem);
+          });
+      })
+      .catch(error => console.error('Error fetching achievements:', error.message));
+  </script>
+</body>
+</html>

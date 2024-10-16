@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            background-color: #ffffff;
+            height: 100vh;
+        }
+
+        #userListPanel {
+            width: 20%;
+            background-color: #f4f4f4;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        #adminContent {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .user-item {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .manage-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .user-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .details {}
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        .detail-text {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .manage-btn {
+            background-color: #4CAF50;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="userListPanel">
+        <div class="user-title">Users</div>
+    </div>
+    <div id="adminContent"></div>
+
+    <script>
+        window.onload = function () {
+            const apiKey = sessionStorage.getItem('API_Key');
+            if (!apiKey) window.location.href = 'dashboard.html';
+            fetch('https://scatterbox.dev/api/math/verify-api-key', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-key': apiKey,
+                    'session-token': sessionStorage.getItem('session_token'),
+                    'encrypted-token': sessionStorage.getItem('encrypted_token')
+                }
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = 'dashboard.html';
+                    return Promise.reject('Unauthorized');
+                }
+                return response.json();
+            })
+            .then(() => {
+                fetch('https://scatterbox.dev/api/math/usernames', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': apiKey,
+                        'session-token': sessionStorage.getItem('session_token'),
+                        'encrypted-token': sessionStorage.getItem('encrypted_token')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const userListPanel = document.getElementById('userListPanel');
+                    if (Array.isArray(data.usernames)) {
+                        data.usernames.forEach(username => {
+                            const userDiv = document.createElement('div');
+                            userDiv.className = 'user-item';
+                            const userNameSpan = document.createElement('span');
+                            userNameSpan.textContent = username;
+                            const manageButton = document.createElement('button');
+                            manageButton.classList.add('manage-btn');
+                            manageButton.textContent = 'Manage User';
+                            manageButton.onclick = () => manageUser(username);
+                            userDiv.appendChild(userNameSpan);
+                            userDiv.appendChild(manageButton);
+                            userListPanel.appendChild(userDiv);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            })
+            .catch(error => console.error('Error:', error));
+        };
+
+        function manageUser(username) {
+            sessionStorage.setItem('username', username);
+            const apiKey = sessionStorage.getItem('API_Key');
+            fetch('https://scatterbox.dev/api/math/user-detail', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api-key': apiKey,
+                    'username': username,
+                    'session-token': sessionStorage.getItem('session_token'),
+                    'encrypted-token': sessionStorage.getItem('encrypted_token')
+                }
+            })
+                .then(response => response.json())
+                .then(data => displayUserDetail(data.user_detail))
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayUserDetail(userDetail) {
+            const adminContent = document.getElementById('adminContent');
+            let tokenContent = '';
+            if (userDetail.token && userDetail.token !== "No token found") {
+                tokenContent = `
+                    <div><span class="detail-text">Decrypted Token: <button onclick="copyToClipboard('${userDetail.decrypted_token}')">Copy Decrypted Token</button></span></div>
+                    <div><span class="detail-text">Token: <button onclick="copyToClipboard('${userDetail.token}')">Copy Token</button></span></div>
+                `;
+            } else {
+                tokenContent = `
+                    <div><span class="detail-text">Token: No token found</span></div>
+                `;
+            }
+            adminContent.innerHTML = `<div class="details">
+                                          <h3>User Details</h3>
+                                          <div><span class="detail-text">Username: ${userDetail.username}</span></div>
+                                          <div><span class="detail-text">Locked: ${userDetail.locked}</span></div>
+                                          <div><span class="detail-text">Mod: ${userDetail.moderator}</span></div>
+                                          <div><span class="detail-text">Dev: ${userDetail.dev}</span></div>
+                                          <div><span class="detail-text">Points: ${userDetail.points}</span></div>
+                                          <div><span class="detail-text">User ID: ${userDetail.user_id}</span></div>
+                                          ${tokenContent}
+                                      </div>
+                                      <div class="actions">
+                                          <button class="manage-btn" onclick="lockUser('${userDetail.user_id}')">Lock User</button>
+                                          <button class="manage-btn" onclick="unlockUser('${userDetail.user_id}')">Unlock User</button>
+                                          <button class="manage-btn" onclick="deleteUser('${userDetail.user_id}')">Delete User</button>
+                                          <button class="manage-btn" onclick="wipeUser('${userDetail.user_id}')">Wipe User</button>
+                                          <button class="manage-btn" onclick="addPoints('${userDetail.user_id}')">Add points</button>
+                                          <button class="manage-btn" onclick="generateLink('${userDetail.user_id}')">Generate login link</button>
+                                          <button class="manage-btn" onclick="GrantMod('${userDetail.user_id}')">Grant moderator</button>
+                                          <button class="manage-btn" onclick="RevokeMod('${userDetail.user_id}')">Revoke moderator</button>
+                                      </div>`;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied to clipboard!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function addPoints(userId) {
+            const apiKey = sessionStorage.getItem('API_Key');
+            let pointsToAdd = prompt("How many points to add?");
+            performAction('mod-add-point', userId, pointsToAdd, 'Points have been added to the user', 'POST');
+        }
+
+        function wipeUser(userId) {
+            const apiKey = sessionStorage.getItem('API_Key');
+            performAction('wipe', userId, 0, 'User data has been wiped.', 'POST');
+        }
+
+        function generateLink(userId) {
+            const apiKey = sessionStorage.getItem('API_Key');
+            if (confirm('Do you want to generate a login link?')) {
+                fetch('https://scatterbox.dev/api/math/generate_login_link', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': apiKey,
+                        'id': userId,
+                        'session-token': sessionStorage.getItem('session_token'),
+                        'encrypted-token': sessionStorage.getItem('encrypted_token')
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.login_link) {  // Check for login_link instead of AURL
+                        window.location.href = data.login_link;  // Use login_link instead of AURL
+                    } else {
+                        alert('Failed to generate link');
+                    }
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                    alert('Failed to generate link');
+                });
+            }
+        }
+
+        function GrantMod(userId) {
+            performAction('GrantMod', userId, 0, 'Moderator has been granted', 'PATCH');
+        }
+
+        function RevokeMod(userId) {
+            performAction('RevokeMod', userId, 0, 'Moderator has been revoked', 'PATCH');
+        }
+
+        function lockUser(userId) {
+            performAction('lock', userId, 0, 'User has been locked.', 'PATCH');
+        }
+
+        function unlockUser(userId) {
+            performAction('unlock', userId, 0, 'User has been unlocked.', 'PATCH');
+        }
+
+        function deleteUser(userId) {
+            performAction('delete', userId, 0, 'User has been deleted.', 'DELETE');
+        }
+
+        function performAction(actionEndpoint, userId, points, successMessage, method) {
+            const fetchOptions = {
+                method: method,
+                headers: {
+                    'api-key': sessionStorage.getItem('API_Key'),
+                    'user-id': userId,
+                    'points': points,
+                    'session-token': sessionStorage.getItem('session_token'),
+                    'encrypted-token': sessionStorage.getItem('encrypted_token')
+                }
+            };
+            if (method !== 'GET' && method !== 'HEAD') {
+                fetchOptions.body = JSON.stringify({ user_id: userId, points: points });
+                fetchOptions.headers['Content-Type'] = 'application/json';
+            }
+            fetch(`https://scatterbox.dev/api/math/${actionEndpoint}`, fetchOptions)
+                .then(response => {
+                    if (response.ok) {
+                        alert(successMessage);
+                        if (sessionStorage.getItem('username')) {
+                            manageUser(sessionStorage.getItem('username'));
+                        }
+                    } else {
+                        alert(`Failed to perform action on user.`);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+
+</html>

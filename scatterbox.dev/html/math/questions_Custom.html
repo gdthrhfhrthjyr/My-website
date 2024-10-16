@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Math Practice</title>
+    <style>
+               body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+        }
+
+        .math-problem-container {
+            text-align: center;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+        .math-problem-question {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+
+        .answer-input {
+            width: 200px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            font-size: 1em;
+        }
+
+        #submit-answer {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit-answer:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="math-problem-container">
+        <div class="math-problem-question" id="question"></div>
+        <input type="number" id="answer" class="answer-input" placeholder="Your answer">
+        <button id="submit-answer">Submit</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const operations = [];
+        if (urlParams.get('addition')) operations.push('+');
+        if (urlParams.get('subtraction')) operations.push('-');
+        if (urlParams.get('multiplication')) operations.push('*');
+        if (urlParams.get('division')) operations.push('/');
+        const min = parseInt(urlParams.get('min')) || 0;
+        const max = parseInt(urlParams.get('max')) || 10;
+
+        function generateQuestions(numQuestions = 10) {
+            const questions = [];
+            for (let i = 0; i < numQuestions; i++) {
+                let num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                let num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+                const operation = operations[Math.floor(Math.random() * operations.length)];
+                let question, answer;
+
+                switch (operation) {
+                    case '+':
+                        question = `${num1} + ${num2}`;
+                        answer = num1 + num2;
+                        break;
+                    case '-':
+                        question = `${num1} - ${num2}`;
+                        answer = num1 - num2;
+                        break;
+                    case '*':
+                        question = `${num1} × ${num2}`;
+                        answer = num1 * num2;
+                        break;
+                    case '/':
+                        // Ensure division results in a whole number
+                        answer = Math.floor(Math.random() * (max - min + 1)) + min;
+                        num1 = answer * num2;
+                        question = `${num1} ÷ ${num2}`;
+                        break;
+                }
+                questions.push({ question, answer });
+            }
+            return questions;
+        }
+
+        let currentQuestionIndex = 0;
+        let questions = generateQuestions();
+
+        function displayQuestion() {
+            document.getElementById('question').textContent = questions[currentQuestionIndex].question;
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const correctAnswer = questions[currentQuestionIndex].answer;
+
+            if (userAnswer === correctAnswer) {
+                alert('Correct!');
+            } else {
+                alert(`Incorrect. The correct answer is ${correctAnswer}.`);
+            }
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                // Generate a new set of questions when the current set is completed
+                questions = generateQuestions();
+                currentQuestionIndex = 0;
+            }
+
+            displayQuestion();
+            document.getElementById('answer').value = '';
+        }
+
+        document.getElementById('submit-answer').addEventListener('click', checkAnswer);
+        document.getElementById('answer').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        displayQuestion();
+    </script>
+</body>
+</html>
