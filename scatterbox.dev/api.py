@@ -1645,8 +1645,8 @@ def verify_moderator_login_key():
             return {"message": "Invalid login key"}, 401
 
     except Exception as e:
-        print(e)
-        return jsonify({"message": f"Internal server error: {str(e)}"}), 500
+        current_app.logger.error(f"Internal server error: {str(e)}")
+        return jsonify({"message": "An internal error has occurred"}), 500
     
 @app.route('/api/math/GrantMod', methods=['PATCH'])
 @check_blocked_ip
