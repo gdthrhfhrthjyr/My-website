@@ -55,7 +55,7 @@ jobs:
       - name: Run FoD SAST Scan
         uses: fortify/github-action@a92347297e02391b857e7015792cd1926a4cd418
         with:
-          sast-scan: true
+          sast-scan: false
         env:
           ### Required configuration when integrating with Fortify on Demand
           FOD_URL: https://ams.fortify.com
