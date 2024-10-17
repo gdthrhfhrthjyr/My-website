@@ -995,7 +995,8 @@ def signup():
         }, 201
     except Exception as e:
         conn.rollback()
-        return {"message": f"Internal server error: {str(e)}"}, 500
+        current_app.logger.error(f"Exception occurred: {str(e)}")
+        return {"message": "Internal server error"}, 500
     finally:
         cursor.close()
         conn.close()
