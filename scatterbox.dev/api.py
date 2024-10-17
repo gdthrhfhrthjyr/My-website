@@ -1500,7 +1500,7 @@ def get_user_detail():
 
     except Exception as e:
         app.logger.error(f"An error occurred in get_user_detail: {str(e)}")
-        return jsonify({"message": f"An error occurred: {str(e)}"}), 500
+        return jsonify({"message": "An internal error has occurred!"}), 500
 
     finally:
         cursor.close()
