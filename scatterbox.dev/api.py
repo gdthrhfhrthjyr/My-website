@@ -457,20 +457,22 @@ def serve_public(path):
             return send_from_directory(public_folder, 'vpn_blocked.html'), 403
     
     app.logger.info(f"Requested path: {path}")
-    full_path = os.path.join(public_folder, path)
+    normalized_path = os.path.normpath(path)
+    full_path = os.path.join(public_folder, normalized_path)
     app.logger.info(f"Full path: {full_path}")
+
+    if not full_path.startswith(public_folder):
+        app.logger.warning(f"Attempted access to invalid path: {full_path}")
+        return send_from_directory(public_folder, 'index.html')
 
     if os.path.isdir(full_path):
         app.logger.info(f"Path is a directory, serving index.html from {full_path}")
         return send_from_directory(full_path, 'index.html')
     
-    if path in ['.', '..'] or '..' in path:
-        return send_from_directory(public_folder, 'index.html')
-    
     try:
-        return send_from_directory(public_folder, path)
+        return send_from_directory(public_folder, normalized_path)
     except FileNotFoundError:
-        app.logger.warning(f"File not found: {path}, serving index.html instead")
+        app.logger.warning(f"File not found: {normalized_path}, serving index.html instead")
         return send_from_directory(public_folder, 'index.html')
 
 @app.route('/')
