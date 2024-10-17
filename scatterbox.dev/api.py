@@ -9,6 +9,7 @@ import base64
 import bcrypt
 import mysql.connector
 from flask import Flask, jsonify, request, send_file, current_app, send_from_directory, render_template, abort, session, redirect, render_template_string, url_for
+import logging
 from flask_cors import CORS
 from dotenv import load_dotenv
 import time
@@ -1666,7 +1667,8 @@ def Grant_Mod():
         return {"message": "Moderator status granted successfully to user"}, 200
     except Exception as e:
         conn.rollback()
-        return {"message": f"Failed to grant moderator status: {str(e)}"}, 500
+        current_app.logger.error(f"Failed to grant moderator status: {str(e)}")
+        return {"message": "Failed to grant moderator status due to an internal error"}, 500
 
 @app.route('/api/math/RevokeMod', methods=['PATCH'])
 @check_blocked_ip
@@ -1688,7 +1690,8 @@ def Revoke_Mod():
         return {"message": "Moderator status revoked successfully from user"}, 200
     except Exception as e:
         conn.rollback()
-        return {"message": f"Failed to revoke moderator status: {str(e)}"}, 500
+        current_app.logger.error(f"Failed to revoke moderator status: {str(e)}")
+        return {"message": "Failed to revoke moderator status due to an internal error"}, 500
 #Chat endpoints----------------------------------------------------------
 
 @app.route('/api/math/admin/get_messages', methods=['GET'])
