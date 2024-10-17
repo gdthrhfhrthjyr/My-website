@@ -51,6 +51,11 @@
       background-color: purple;
     }
 
+    #Multiplication-tables {
+      background-color: orange; /* Blue */
+      margin-top: 20px; /* Maintain some spacing from the difficulty buttons */
+    }
+
     .leaderboard-button {
       background-color: #008CBA; /* Blue */
       margin-top: 20px; /* Maintain some spacing from the difficulty buttons */
@@ -102,6 +107,7 @@
     <button id="easy" class="difficulty-button">Easy</button>
     <button id="medium" class="difficulty-button">Medium</button>
     <button id="hard" class="difficulty-button">Hard</button>
+    <button id="Multiplication-tables" class="difficulty-button leaderboard-button">Multiplication tables(WIP)</button>
     <button id="Custom" class="difficulty-button">Custom difficulty</button>    
     <button id="leaderboard" class="difficulty-button leaderboard-button">Leaderboard</button>
   </div>
@@ -125,6 +131,9 @@
     document.getElementById('leaderboard').addEventListener('click', function() {
       window.location.href = '/math/leaderboard.html';
     });
+    //document.getElementById('Multiplication tables').addEventListener('click', function() {
+    //  window.location.href = '/math/Multiplication tables.html';
+    //});
 
     // Added event listener for settings icon
     document.getElementById('settings-icon').addEventListener('click', function() {
