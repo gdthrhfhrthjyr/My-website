@@ -12,3 +12,6 @@ Deploy.sh
 
 # Ignore fn
 Future_nature.scatterbox.dev
+
+# Ignore file_storage
+file_storage.scatterbox.dev
