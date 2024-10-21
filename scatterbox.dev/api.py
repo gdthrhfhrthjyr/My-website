@@ -53,7 +53,6 @@ CORS(app)
 # Define the path to the JSON file
 MAINTENANCE_FILE = '/var/Site-resources/json/scatterbox.dev/maintenance.json'
 
-ACCESS_KEY = 'KEY_f864c0830ebadb1ecca3'
 app.secret_key = os.environ.get('SECRET_KEY')
 blocked_ips = [
     
