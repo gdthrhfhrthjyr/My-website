@@ -54,7 +54,7 @@ CORS(app)
 MAINTENANCE_FILE = '/var/Site-resources/json/scatterbox.dev/maintenance.json'
 
 ACCESS_KEY = 'KEY_f864c0830ebadb1ecca3'
-app.secret_key = os.environ.get('SECRET_KEY', 'felix1007')
+app.secret_key = os.environ.get('SECRET_KEY')
 blocked_ips = [
     
 ]
@@ -157,7 +157,7 @@ def validate_token(token, encrypted_token):
     
     return True
 
-# Update the require_token decorator to use the in-memory validation
+# Validate user tokens
 def require_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
