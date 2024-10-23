@@ -198,7 +198,12 @@ def index():
 def history():
     try:
         completed_battles = Battle.query.filter_by(status='ended').order_by(Battle.created_at.desc()).all()
-        return render_template('history.html', battle_history=[b.to_dict() for b in completed_battles])
+        battle_history = []
+        for battle in completed_battles:
+            battle_dict = battle.to_dict()
+            battle_dict['team_names'] = f"{battle.team_a_name} vs {battle.team_b_name}"
+            battle_history.append(battle_dict)
+        return render_template('history.html', battle_history=battle_history)
     except Exception as e:
         return render_template('500.html', error=str(e)), 500
 
