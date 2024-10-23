@@ -15,3 +15,6 @@ Future_nature.scatterbox.dev
 
 # Ignore file_storage
 file_storage.scatterbox.dev
+
+# ignore battle_db
+gelblast.scatterbox.dev/instance
