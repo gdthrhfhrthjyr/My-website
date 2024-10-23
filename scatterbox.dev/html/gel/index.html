@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelblaster Battles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #battle-info {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .battle-status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .in-progress { background-color: #4caf50; color: white; }
+        .canceled { background-color: #f44336; color: white; }
+        .paused { background-color: #ff9800; color: white; }
+    </style>
+</head>
+<body>
+    <div id="battle-info">
+        <h1>Gelblaster Battles</h1>
+        <!-- Battle information will be dynamically inserted here -->
+    </div>
+    <script>
+        // Example data, replace with API call
+        const battleData = {
+            status: 'in-progress', // Options: 'in-progress', 'canceled', 'paused', 'scheduled'
+            score: { teamA: 5, teamB: 3 },
+            scheduledTime: '2023-11-01T15:00:00Z'
+        };
+
+        const battleInfoDiv = document.getElementById('battle-info');
+
+        // Function to get status text and class
+        function getStatusDetails(battleData) {
+            let statusText = '';
+            let statusClass = '';
+
+            switch (battleData.status) {
+                case 'in-progress':
+                    statusText = `In Progress - Score: Team A ${battleData.score.teamA} - Team B ${battleData.score.teamB}`;
+                    statusClass = 'in-progress';
+                    break;
+                case 'canceled':
+                    statusText = 'Battle Canceled';
+                    statusClass = 'canceled';
+                    break;
+                case 'paused':
+                    statusText = 'Battle Paused';
+                    statusClass = 'paused';
+                    break;
+                case 'scheduled':
+                    const scheduledDate = new Date(battleData.scheduledTime);
+                    statusText = `Scheduled to start at ${scheduledDate.toLocaleTimeString()} on ${scheduledDate.toLocaleDateString()}`;
+                    break;
+            }
+
+            return { statusText, statusClass };
+        }
+
+        // Get status details and update the DOM
+        const { statusText, statusClass } = getStatusDetails(battleData);
+        battleInfoDiv.innerHTML += `<div class="battle-status ${statusClass}">${statusText}</div>`;
+    </script>
+</body>
+</html>
