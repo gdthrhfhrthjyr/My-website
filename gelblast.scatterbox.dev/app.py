@@ -4,22 +4,24 @@ from datetime import datetime, timedelta
 from functools import wraps
 from models import db, Battle
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv('/var/Site-resources/.envs/gelblast.scatterbox.dev/.env')
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY") 
+CORS(app)  # Enable CORS for all routes
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///battles.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-# Admin credentials (in a real-world scenario, use a database and proper hashing)
+# Admin credentials
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
-# Define login_required decorator before using it
+# Define login_required decorator
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -36,6 +38,9 @@ def get_scheduled_battles():
 
 def get_last_completed_battle():
     return Battle.query.filter(Battle.status.in_(['ended', 'canceled'])).order_by(Battle.updated_at.desc()).first()
+
+def get_all_battles():
+    return Battle.query.order_by(Battle.created_at.desc()).all()
 
 @app.route('/api/battle-status')
 def battle_status():
@@ -62,6 +67,22 @@ def battle_status():
         })
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/delete-battle/<int:battle_id>', methods=['POST'])
+@login_required
+def delete_battle(battle_id):
+    try:
+        battle = Battle.query.get_or_404(battle_id)
+        
+        # Don't allow deletion of in-progress battles
+        if battle.status == 'in_progress':
+            return jsonify({'error': 'Cannot delete an in-progress battle'}), 400
+            
+        db.session.delete(battle)
+        db.session.commit()
+        return jsonify({'message': 'Battle record deleted successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/end-match', methods=['POST'])
 @login_required
@@ -229,7 +250,11 @@ def admin_logout():
 def admin_panel():
     current_battle = get_current_battle()
     scheduled_battles = get_scheduled_battles()
-    return render_template('admin_panel.html', current_battle=current_battle, scheduled_battles=scheduled_battles)
+    all_battles = get_all_battles()
+    return render_template('admin_panel.html', 
+                         current_battle=current_battle, 
+                         scheduled_battles=scheduled_battles,
+                         all_battles=all_battles)
 
 @app.route('/admin/create_battle', methods=['POST'])
 @login_required
