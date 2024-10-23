@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") 
 
 # Configure database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///var/sites/gelblast.scatterbox.dev/instance/battles.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///battles.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
