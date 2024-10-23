@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Gelblaster Battles</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4"><i class="fas fa-cogs"></i> Admin Panel</h1>
+        
+        <div class="row">
+            <!-- Current Match Section -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3>Current Match</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if current_battle and current_battle.status == 'in_progress' %}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h4>{{ current_battle.team_a_name }}</h4>
+                                <div class="btn-group">
+                                    <button class="btn btn-danger" onclick="updateScore('a', -1)">-</button>
+                                    <span class="btn btn-light">{{ current_battle.team_a_score }}</span>
+                                    <button class="btn btn-success" onclick="updateScore('a', 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="mb-3">
+                                    <button class="btn btn-warning" onclick="togglePause()">
+                                        {% if current_battle.status == 'paused' %}Unpause{% else %}Pause{% endif %}
+                                    </button>
+                                    <button class="btn btn-danger" onclick="cancelMatch()">Cancel</button>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-success btn-lg" onclick="endMatch()">
+                                        <i class="fas fa-flag-checkered"></i> End Match
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h4>{{ current_battle.team_b_name }}</h4>
+                                <div class="btn-group">
+                                    <button class="btn btn-danger" onclick="updateScore('b', -1)">-</button>
+                                    <span class="btn btn-light">{{ current_battle.team_b_score }}</span>
+                                    <button class="btn btn-success" onclick="updateScore('b', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-center">No match currently in progress</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule New Match Section -->
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3>Schedule New Match</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('create_battle') }}" method="POST" class="battle-form">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Match Date</label>
+                                    <input type="date" class="form-control" name="match_date" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Match Time</label>
+                                    <input type="time" class="form-control" name="match_time" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Team A Name</label>
+                                    <input type="text" class="form-control" name="team_a_name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Team B Name</label>
+                                    <input type="text" class="form-control" name="team_b_name" required>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success" {% if current_battle and current_battle.status == 'in_progress' %}disabled{% endif %}>
+                                        Schedule New Match
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Matches Section -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h3>Scheduled Matches</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Team A</th>
+                                        <th>Team B</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for battle in scheduled_battles %}
+                                    <tr>
+                                        <td>{{ battle.scheduled_time.strftime('%Y-%m-%d') }}</td>
+                                        <td>{{ battle.scheduled_time.strftime('%H:%M') }}</td>
+                                        <td>{{ battle.team_a_name }}</td>
+                                        <td>{{ battle.team_b_name }}</td>
+                                        <td>{{ battle.status }}</td>
+                                        <td>
+                                            {% if battle.status == 'scheduled' %}
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-success" onclick="startBattle({{ battle.id }})">
+                                                    Start Battle
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="cancelScheduledMatch({{ battle.id }})">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <script>
+    function updateScore(team, change) {
+        fetch('/api/update-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ team, change })
+        }).then(() => window.location.reload());
+    }
+
+    function togglePause() {
+        fetch('/api/toggle-pause', {
+            method: 'POST'
+        }).then(() => window.location.reload());
+    }
+
+    function cancelMatch() {
+        if (confirm('Are you sure you want to cancel this match?')) {
+            fetch('/api/cancel-match', {
+                method: 'POST'
+            }).then(() => window.location.reload());
+        }
+    }
+
+    function endMatch() {
+        if (confirm('Are you sure you want to end this match? This will determine the winner based on current scores.')) {
+            fetch('/api/end-match', {
+                method: 'POST'
+            }).then(() => window.location.reload());
+        }
+    }
+
+    function cancelScheduledMatch(matchId) {
+        if (confirm('Are you sure you want to cancel this scheduled match?')) {
+            fetch(`/api/cancel-scheduled-match/${matchId}`, {
+                method: 'POST'
+            }).then(() => window.location.reload());
+        }
+    }
+
+    function startBattle(matchId) {
+        if (confirm('Are you sure you want to start this battle?')) {
+            fetch(`/api/start-battle/${matchId}`, {
+                method: 'POST'
+            }).then(() => window.location.reload());
+        }
+    }
+    </script>
+</body>
+</html>
