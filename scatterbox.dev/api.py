@@ -357,6 +357,38 @@ def chat_login(key):
     
 # General endpoints-------------------------------------------------------------------------------------
 
+@app.route('/api/prox', methods=['POST'])
+def mirror_request():
+    # Extract the target URL from the custom "url" header
+    target_url = request.headers.get("url")
+    
+    if not target_url:
+        return "Error: Missing 'url' header.", 400
+
+    # Prepare the forwarded request
+    headers = {key: value for key, value in request.headers if key.lower() != 'host'}
+    headers.pop('url', None)  # Remove the "url" header to avoid sending it to the target server
+
+    # Forward the request
+    try:
+        response = requests.request(
+            method=request.method,
+            url=target_url,
+            headers=headers,
+            data=request.get_data(),
+            params=request.args
+        )
+        
+        # Construct the response to return to the original requester
+        forwarded_response = Response(response.content, response.status_code)
+        for key, value in response.headers.items():
+            forwarded_response.headers[key] = value
+
+        return forwarded_response
+
+    except requests.exceptions.RequestException as e:
+        return f"Request forwarding failed: {e}", 500
+
 @app.route('/api/verify-key', methods=['POST'])
 @check_blocked_ip
 def verify_api_key1():
