@@ -361,7 +361,7 @@ def chat_login(key):
 def mirror_request():
     # Extract the target URL from the custom "url" header
     target_url = request.headers.get("url")
-    if request.headers.get("key") != os.environ.get("proxy")
+    if request.headers.get("key") != os.environ.get("proxy"):
         return "Error: bad 'key' header.", 400
     if not target_url:
         return "Error: Missing 'url' header.", 400
