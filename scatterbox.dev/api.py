@@ -361,13 +361,16 @@ def chat_login(key):
 def mirror_request():
     # Extract the target URL from the custom "url" header
     target_url = request.headers.get("url")
-    
+    if request.headers.get("key") != os.environ.get("proxy")
+        return "Error: bad 'key' header.", 400
     if not target_url:
         return "Error: Missing 'url' header.", 400
 
     # Prepare the forwarded request
     headers = {key: value for key, value in request.headers if key.lower() != 'host'}
     headers.pop('url', None)  # Remove the "url" header to avoid sending it to the target server
+    headers.pop('key', None)
+    
 
     # Forward the request
     try:
