@@ -1,60 +1,60 @@
 function updateBattleInfo(data) {
-    console.log('Updating battle info with:', data);
+    console.log('Opdaterer kamp info med:', data);
     const statusContainer = document.getElementById('status-container');
     const scoreContainer = document.getElementById('score-container');
     const scheduleContainer = document.getElementById('schedule-container');
     const errorContainer = document.getElementById('error-container');
 
-    // Clear previous error messages
+    // Ryd tidligere fejlmeddelelser
     errorContainer.innerHTML = '';
 
-    // Update status
-    let statusText = 'Unknown Status';
+    // Opdater status
+    let statusText = 'Ukendt Status';
     let statusClass = '';
     if (data && data.status) {
         switch (data.status) {
             case 'in_progress':
-                statusText = 'Match In Progress';
+                statusText = 'Kamp Igangværende';
                 statusClass = 'match-in-progress';
                 break;
             case 'canceled':
-                statusText = 'Match Canceled';
+                statusText = 'Kamp Annulleret';
                 statusClass = 'canceled';
                 break;
             case 'paused':
-                statusText = 'Match Paused';
+                statusText = 'Kamp Pauset';
                 statusClass = 'paused';
                 break;
             case 'scheduled':
-                statusText = 'Match Scheduled';
+                statusText = 'Kamp Planlagt';
                 statusClass = 'scheduled';
                 break;
             case 'ended':
-                statusText = 'Match Ended';
+                statusText = 'Kamp Afsluttet';
                 statusClass = 'ended';
                 break;
             case 'no_active_battles':
-                statusText = 'No Active Battles';
+                statusText = 'Ingen Aktive Kampe';
                 statusClass = 'no-matches';
                 break;
             case 'error':
-                statusText = 'Error: ' + (data.message || 'Unknown error');
+                statusText = 'Fejl: ' + (data.message || 'Ukendt fejl');
                 statusClass = 'error';
-                errorContainer.innerHTML = `<div class="alert alert-danger">${data.message || 'An unknown error occurred'}</div>`;
+                errorContainer.innerHTML = `<div class="alert alert-danger">${data.message || 'En ukendt fejl opstod'}</div>`;
                 break;
             default:
-                errorContainer.innerHTML = '<div class="alert alert-danger">Error: Unknown battle status</div>';
+                errorContainer.innerHTML = '<div class="alert alert-danger">Fejl: Ukendt kamp status</div>';
         }
     } else {
-        errorContainer.innerHTML = '<div class="alert alert-danger">Error: Invalid battle data</div>';
+        errorContainer.innerHTML = '<div class="alert alert-danger">Fejl: Ugyldige kamp data</div>';
     }
     statusContainer.innerHTML = `<div class="battle-status ${statusClass}">${statusText}</div>`;
-    console.log('Status updated:', statusText);
+    console.log('Status opdateret:', statusText);
 
-    // Update score (for all states except scheduled and canceled)
+    // Opdater score (for alle stater undtagen planlagt og annulleret)
     if (data && data.status && data.status !== 'scheduled' && data.status !== 'canceled' && data.score) {
-        const teamAName = data.score.team_names?.teamA || 'Team A';
-        const teamBName = data.score.team_names?.teamB || 'Team B';
+        const teamAName = data.score.team_names?.teamA || 'Hold A';
+        const teamBName = data.score.team_names?.teamB || 'Hold B';
         
         scoreContainer.innerHTML = `
             <div class="team-score">
@@ -69,14 +69,14 @@ function updateBattleInfo(data) {
                 </div>
             </div>
         `;
-        console.log('Score updated:', data.score);
+        console.log('Score opdateret:', data.score);
         
         if (data.status === 'ended' && data.winner) {
-            scoreContainer.innerHTML += `<div class="winner">Winner: ${data.winner}</div>`;
+            scoreContainer.innerHTML += `<div class="winner">Vinder: ${data.winner}</div>`;
         }
     } else if (data && data.status === 'scheduled') {
-        const teamAName = data.team_a_name || 'Team A';
-        const teamBName = data.team_b_name || 'Team B';
+        const teamAName = data.team_a_name || 'Hold A';
+        const teamBName = data.team_b_name || 'Hold B';
         scoreContainer.innerHTML = `
             <div class="team-score">
                 <div class="team">
@@ -87,50 +87,49 @@ function updateBattleInfo(data) {
             </div>
         `;
     } else {
-        scoreContainer.innerHTML = '<p>No score available</p>';
-        console.log('Score container cleared');
+        scoreContainer.innerHTML = '<p>Ingen score tilgængelig</p>';
+        console.log('Score container ryddet');
     }
-
-    // Update schedule (only for scheduled matches)
+    // Opdater tidsplan (kun for planlagte kampe)
     if (data && data.status === 'scheduled' && data.scheduledTime) {
         try {
             const scheduledDate = new Date(data.scheduledTime);
-            const teamAName = data.team_a_name || 'Team A';
-            const teamBName = data.team_b_name || 'Team B';
+            const teamAName = data.team_a_name || 'Hold A';
+            const teamBName = data.team_b_name || 'Hold B';
             scheduleContainer.innerHTML = `
                 <div class="schedule-info">
                     <i class="far fa-calendar-alt"></i> 
                     ${teamAName} vs ${teamBName}<br>
-                    Scheduled to start at ${scheduledDate.toLocaleTimeString()} on ${scheduledDate.toLocaleDateString()}
+                    Planlagt til at starte kl. ${scheduledDate.toLocaleTimeString()} den ${scheduledDate.toLocaleDateString()}
                 </div>
             `;
-            console.log('Schedule updated:', data.scheduledTime);
+            console.log('Tidsplan opdateret:', data.scheduledTime);
         } catch (error) {
-            scheduleContainer.innerHTML = '<p>Invalid scheduled time</p>';
-            console.error('Error parsing scheduled time:', error);
+            scheduleContainer.innerHTML = '<p>Ugyldig planlagt tid</p>';
+            console.error('Fejl ved parsing af planlagt tid:', error);
         }
     } else {
-        scheduleContainer.innerHTML = '<p>No schedule available</p>';
-        console.log('Schedule container cleared');
+        scheduleContainer.innerHTML = '<p>Ingen tidsplan tilgængelig</p>';
+        console.log('Tidsplan container ryddet');
     }
 
-    console.log('Battle info update completed');
+    console.log('Kamp info opdatering afsluttet');
 }
 
 function fetchBattleStatus() {
     fetch('/api/battle-status')
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Netværksrespons var ikke ok');
             }
             return response.json();
         })
         .then(data => updateBattleInfo(data))
         .catch(error => {
-            console.error('Error fetching battle status:', error);
+            console.error('Fejl ved hentning af kamp status:', error);
             updateBattleInfo({
                 status: 'error',
-                message: 'Failed to fetch battle status: ' + error.message
+                message: 'Kunne ikke hente kamp status: ' + error.message
             });
         });
 }
@@ -139,5 +138,5 @@ function fetchBattleStatus() {
 const initialData = JSON.parse(document.getElementById('battle-data').textContent);
 updateBattleInfo(initialData);
 
-// Update every 10 seconds
+// Opdater hver 10 sekunder
 setInterval(fetchBattleStatus, 10000);

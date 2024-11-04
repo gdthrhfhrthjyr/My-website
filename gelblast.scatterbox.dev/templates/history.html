@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="da" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gelblaster Battles - History</title>
+    <title>Gelblaster Kampe - Historik</title>
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4"><i class="fas fa-history"></i> Battle History</h1>
+        <h1 class="text-center mb-4"><i class="fas fa-history"></i> Kamp Historik</h1>
         <div class="row">
             {% for battle in battle_history|reverse %}
             {% if battle.winner %}
@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div class="winner">
-                        Winner: {{ battle.winner }}
+                        Vinder: {{ battle.winner }}
                     </div>
                     <div class="mt-2 text-muted">
                         <small>{{ battle.timestamp|datetime }}</small>
@@ -44,7 +44,7 @@
         </div>
         <div class="text-center mt-4">
             <a href="{{ url_for('index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Current Battle
+                <i class="fas fa-arrow-left"></i> Tilbage til Aktuel Kamp
             </a>
         </div>
     </div>
