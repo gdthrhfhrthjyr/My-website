@@ -357,7 +357,7 @@ def chat_login(key):
     
 # General endpoints-------------------------------------------------------------------------------------
 
-@app.route('/api/prox')
+@app.route('/api/prox', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 def mirror_request():
     # Extract the target URL from the custom "url" header
     target_url = request.headers.get("url")
