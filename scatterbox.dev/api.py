@@ -60,7 +60,7 @@ LOCKED_ACCOUNTS_FILE = '/var/Site-resources/json/scatterbox.dev/locked_accounts.
 ensure_encryption_key(ENCRYPTION_KEY_FILE)
 ensure_encryption_key(CHAT_ENCRYPTION_KEY_FILE)
 ensure_file_exists(MAINTENANCE_FILE, default_content={'maintenance_mode': False})
-ensure_file_exists(BANNED_IPS_FILE, default_content=[])
+ensure_file_exists(BANNED_IPS_FILE, default_content={})
 ensure_file_exists(LOCKED_ACCOUNTS_FILE, default_content={})
 
 with open('/var/Site-resources/Encryption/Encryption.key', 'rb') as key_file:
@@ -930,7 +930,10 @@ def mfa_login():
     conn.close()
 
     user_info = convert_to_boolean(user_info, ['moderator'])
-    decrypted_token = fernet.decrypt(token.encode()).decode()
+    try:
+        decrypted_token = fernet.decrypt(token.encode()).decode()
+    except cryptography.fernet.InvalidToken:
+        return {"message": "Failed to decrypt token"}, 500
 
     return {
         "message": "User logged in successfully",
@@ -1026,7 +1029,10 @@ def login():
     conn.close()
 
     user_info = convert_to_boolean(user_info, ['moderator'])
-    decrypted_token = fernet.decrypt(token.encode()).decode()
+    try:
+        decrypted_token = fernet.decrypt(token.encode()).decode()
+    except cryptography.fernet.InvalidToken:
+        return {"message": "Failed to decrypt token"}, 500
 
     return {
         "message": "User logged in successfully",
