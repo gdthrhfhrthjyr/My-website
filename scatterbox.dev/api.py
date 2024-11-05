@@ -31,6 +31,8 @@ import qrcode
 import io
 import threading
 
+load_dotenv('../.env')
+
 # Ensure necessary files and directories exist
 def ensure_file_exists(file_path, default_content=None):
     if not os.path.exists(file_path):

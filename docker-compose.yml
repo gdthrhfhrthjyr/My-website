@@ -10,24 +10,6 @@ services:
       cache_from:
         - scatterbox:latest
     image: scatterbox:latest
-    environment:
-      - FLASK_APP=api.py
-      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
-      - DEV_API_KEY=${DEV_API_KEY}
-      - API_KEY=${API_KEY}
-      - DBHOST=${DBHOST}
-      - DBDATABASE=${DBDATABASE}
-      - DBUSER=${DBUSER}
-      - DBPASSWORD=${DBPASSWORD}
-      - site_dev_api_key=${site_dev_api_key}
-      - VPN_detection_API_key=${VPN_detection_API_key}
-      - ChatDbHost=${ChatDbHost}
-      - ChatDbDatabase=${ChatDbDatabase}
-      - ChatDbUser=${ChatDbUser}
-      - ChatDbPassword=${ChatDbPassword}
-      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
-      - AI_MODERATION_API_KEY=${AI_MODERATION_API_KEY}
-      - proxy=${proxy}
     volumes:
       - ./scatterbox.dev:/app
       - /var/Site-resources/logs/scatterbox.dev:/var/Site-resources/logs/scatterbox.dev
@@ -50,11 +32,6 @@ services:
       cache_from:
         - gelblaster:latest
     image: gelblaster:latest
-    environment:
-      - FLASK_APP=app.py
-      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
-      - ADMIN_USERNAME=${ADMIN_USERNAME}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
       - ./gelblast.scatterbox.dev:/app
       - sqlite_data:/app/instance
@@ -88,12 +65,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.scatterbox.dev`)"
+      - "traefik.http.routers.dashboard.rule=Host(`.scatterbox.dev`)"
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:8080/api/version"]
       interval: 10s
       timeout: 5s
       retries: 3
+    tls:
+      certificates:
+          - certFile: /etc/letsencrypt/live/scatterbox.dev/fullchain.pem
+            keyFile: /etc/letsencrypt/live/scatterbox.dev/privkey.pem
 
 volumes:
   mysql_data:
