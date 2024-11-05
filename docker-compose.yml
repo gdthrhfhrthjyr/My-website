@@ -33,11 +33,8 @@ services:
       - /var/Site-resources/logs/scatterbox.dev:/var/Site-resources/logs/scatterbox.dev
       - ./requirements.txt:/app/requirements.txt
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.main-app.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.main-app.entrypoints=web"
+      - "traefik.http.routers.main-app.rule=Host(`scatterbox.dev`)"
       - "traefik.http.services.main-app.loadbalancer.server.port=3001"
-
   main-app-2:
     <<: *main-app
 
@@ -63,11 +60,8 @@ services:
       - sqlite_data:/app/instance
       - ./requirements.txt:/app/requirements.txt
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.gelblaster.rule=Host(`gelblast.${DOMAIN}`)"
-      - "traefik.http.routers.gelblaster.entrypoints=web"
+      - "traefik.http.routers.gelblaster.rule=Host(`gelblast.scatterbox.dev`)"
       - "traefik.http.services.gelblaster.loadbalancer.server.port=3004"
-
   db:
     image: mysql:8.0
     environment:
@@ -86,27 +80,17 @@ services:
   traefik:
     image: traefik:v3.2
     command:
-      - "--api.dashboard=true"
       - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.dashboard.address=:8081"
-      - "--log.level=INFO"
+      - "--providers.docker"
     ports:
       - "80:80"
-      - "8081:8081"
+      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=dashboard"
-      - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.scatterbox.dev`)"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:8081/api/version"]
+      test: ["CMD", "wget", "--spider", "http://localhost:8080/api/version"]
       interval: 10s
       timeout: 5s
       retries: 3

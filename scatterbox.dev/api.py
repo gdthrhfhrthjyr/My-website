@@ -31,7 +31,35 @@ import qrcode
 import io
 import threading
 
+# Ensure necessary files and directories exist
+def ensure_file_exists(file_path, default_content=None):
+    if not os.path.exists(file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, 'w') as file:
+            if default_content:
+                json.dump(default_content, file)
 
+# Ensure encryption key files exist and generate keys if they don't
+def ensure_encryption_key(file_path):
+    if not os.path.exists(file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        key = Fernet.generate_key()
+        with open(file_path, 'wb') as file:
+            file.write(key)
+
+# Define paths to necessary files
+ENCRYPTION_KEY_FILE = '/var/Site-resources/Encryption/Encryption.key'
+CHAT_ENCRYPTION_KEY_FILE = '/var/Site-resources/Encryption/Chat_Encryption.key'
+MAINTENANCE_FILE = '/var/Site-resources/json/scatterbox.dev/maintenance.json'
+BANNED_IPS_FILE = '/var/Site-resources/json/scatterbox.dev/banned_ips.json'
+LOCKED_ACCOUNTS_FILE = '/var/Site-resources/json/scatterbox.dev/locked_accounts.json'
+
+# Ensure necessary files exist
+ensure_encryption_key(ENCRYPTION_KEY_FILE)
+ensure_encryption_key(CHAT_ENCRYPTION_KEY_FILE)
+ensure_file_exists(MAINTENANCE_FILE, default_content={'maintenance_mode': False})
+ensure_file_exists(BANNED_IPS_FILE, default_content=[])
+ensure_file_exists(LOCKED_ACCOUNTS_FILE, default_content={})
 
 with open('/var/Site-resources/Encryption/Encryption.key', 'rb') as key_file:
     key = key_file.read()
