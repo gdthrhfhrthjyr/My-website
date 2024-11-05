@@ -67,7 +67,7 @@ services:
       - mysql_data:/var/lib/mysql
 
   traefik:
-    image: traefik:v2.5
+    image: traefik:v3.2
     command:
       - "--api.dashboard=true"
       - "--api.insecure=true"
