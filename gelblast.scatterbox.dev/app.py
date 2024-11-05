@@ -6,7 +6,7 @@ from models import db, Battle
 from dotenv import load_dotenv
 from flask_cors import CORS
 
-load_dotenv('../.env')
+load_dotenv('/var/sites/.env')
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes

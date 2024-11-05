@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  main-app-1: &main-app
+  main-app:
     build:
       context: .
       dockerfile: scatterbox.dev/Dockerfile
@@ -12,16 +12,12 @@ services:
     image: scatterbox:latest
     volumes:
       - ./scatterbox.dev:/app
-      - /var/Site-resources/logs/scatterbox.dev:/var/Site-resources/logs/scatterbox.dev
+      - /var:/var
       - ./requirements.txt:/app/requirements.txt
     labels:
       - "traefik.http.routers.main-app.rule=Host(`scatterbox.dev`)"
-      - "traefik.http.services.main-app.loadbalancer.server.port=3001"
-  main-app-2:
-    <<: *main-app
-
-  main-app-3:
-    <<: *main-app
+      - "traefik.http.services.gelblaster.loadbalancer.server.port=3001"
+    scale: 3
 
   gelblaster:
     build:
@@ -65,16 +61,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - "traefik.http.routers.dashboard.rule=Host(`.scatterbox.dev`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.scatterbox.dev`)"
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:8080/api/version"]
       interval: 10s
       timeout: 5s
       retries: 3
-    tls:
-      certificates:
-          - certFile: /etc/letsencrypt/live/scatterbox.dev/fullchain.pem
-            keyFile: /etc/letsencrypt/live/scatterbox.dev/privkey.pem
 
 volumes:
   mysql_data:
