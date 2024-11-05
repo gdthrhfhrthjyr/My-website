@@ -1,7 +1,7 @@
 import os
 import random
 import string
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 import uuid
 import datetime
 import base64
@@ -387,6 +387,12 @@ def mirror_request():
     if not target_url:
         app.logger.info("Error: Missing 'url' header.")
         return "Error: Missing 'url' header.", 400
+
+    # Validate the target URL
+    allowed_domains = ["example.com", "another-allowed-domain.com"]
+    parsed_url = urlparse(target_url)
+    if parsed_url.hostname not in allowed_domains:
+        return "Error: 'url' header points to an unauthorized domain.", 400
 
     # Prepare the forwarded request
     headers = {key: value for key, value in request.headers if key.lower() != 'host'}
