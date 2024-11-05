@@ -8,7 +8,7 @@ import base64
 
 import bcrypt
 import mysql.connector
-from flask import Flask, jsonify, request, send_file, current_app, send_from_directory, render_template, abort, session, redirect, render_template_string, url_for
+from flask import Flask, jsonify, request, send_file, current_app, send_from_directory, render_template, abort, session, redirect, render_template_string, url_for, Response
 import logging
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -45,7 +45,7 @@ dotenv_path = '/var/Site-resources/.envs/scatterbox.dev/.env'
 
 load_dotenv(dotenv_path)
 
-public_folder = 'html/'
+public_folder = '/var/sites/scatterbox.dev/html'
 
 app = Flask('app')
 CORS(app)
@@ -57,6 +57,7 @@ app.secret_key = os.environ.get('SECRET_KEY')
 blocked_ips = [
     
 ]
+b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 #gen funcs---------------------------------------------------------------------------------------------
 # Load the maintenance mode state from the JSON file¨
 def load_maintenance_state():
@@ -251,6 +252,24 @@ def is_vpn_or_proxy(ip):
         print(f"Error: {response.status_code} - {response.text}")
         return False
 
+# Decoding function
+def decode(data):
+    # Remove any characters not in the Base64 set (ignore non-base64 characters)
+    filtered_data = ''.join([char for char in data if char in b + '='])
+    
+    # Prepare the binary representation of the encoded data
+    binary_data = ''.join(
+        bin(b.index(char))[2:].zfill(6) for char in filtered_data if char != '='
+    )
+    
+    # Split binary data into 8-bit chunks and convert to ASCII characters
+    decoded_string = ''.join(
+        chr(int(binary_data[i:i + 8], 2)) for i in range(0, len(binary_data), 8)
+        if len(binary_data[i:i + 8]) == 8
+    )
+    
+    return decoded_string
+
 # math func---------------------------------------------------------------------------------------------
 def clear_expired_activations():
     conn, cursor = get_db_connection()
@@ -357,20 +376,23 @@ def chat_login(key):
     
 # General endpoints-------------------------------------------------------------------------------------
 
-@app.route('/api/prox', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
+@app.route('/api/prox', methods=['*'])
 def mirror_request():
     # Extract the target URL from the custom "url" header
-    target_url = request.headers.get("url")
+    target_url = decode(request.headers.get("url"))
+    (f"Target URL: {target_url}")
     if request.headers.get("key") != os.environ.get("proxy"):
+        app.logger.info("Error: bad 'key' header.")
         return "Error: bad 'key' header.", 400
     if not target_url:
+        app.logger.info("Error: Missing 'url' header.")
         return "Error: Missing 'url' header.", 400
 
     # Prepare the forwarded request
     headers = {key: value for key, value in request.headers if key.lower() != 'host'}
     headers.pop('url', None)  # Remove the "url" header to avoid sending it to the target server
     headers.pop('key', None)
-    
+    app.logger.info(f"Forwarding headers: {headers}")
 
     # Forward the request
     try:
@@ -381,6 +403,8 @@ def mirror_request():
             data=request.get_data(),
             params=request.args
         )
+        app.logger.info(f"Response status code: {response.status_code}")
+        app.logger.info(f"Response headers: {response.headers}")
         
         # Construct the response to return to the original requester
         forwarded_response = Response(response.content, response.status_code)
@@ -390,6 +414,7 @@ def mirror_request():
         return forwarded_response
 
     except requests.exceptions.RequestException as e:
+        app.logger.info(f"Request forwarding failed: {e}")
         return f"Request forwarding failed: {e}", 500
 
 @app.route('/api/verify-key', methods=['POST'])
@@ -1736,4 +1761,4 @@ def get_messages():
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3001)
+    app.run(host='0.0.0.0', port=3001, debug=True)
