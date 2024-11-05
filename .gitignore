@@ -18,3 +18,5 @@ file_storage.scatterbox.dev
 
 # ignore battle_db
 gelblast.scatterbox.dev/instance
+
+.env

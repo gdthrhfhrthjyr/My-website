@@ -41,10 +41,6 @@ with open('/var/Site-resources/Encryption/Chat_Encryption.key', 'rb') as key_fil
     key = key_file.read()
 fernet_chat = Fernet(key)
 
-dotenv_path = '/var/Site-resources/.envs/scatterbox.dev/.env'
-
-load_dotenv(dotenv_path)
-
 public_folder = '/var/sites/scatterbox.dev/html'
 
 app = Flask('app')

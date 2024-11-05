@@ -1,0 +1,93 @@
+version: '3'
+
+services:
+  main-app-1: &main-app
+    build:
+      context: .
+      dockerfile: scatterbox.dev/Dockerfile
+    environment:
+      - FLASK_APP=api.py
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - DEV_API_KEY=${DEV_API_KEY}
+      - API_KEY=${API_KEY}
+      - DBHOST=${DBHOST}
+      - DBDATABASE=${DBDATABASE}
+      - DBUSER=${DBUSER}
+      - DBPASSWORD=${DBPASSWORD}
+      - site_dev_api_key=${site_dev_api_key}
+      - VPN_detection_API_key=${VPN_detection_API_key}
+      - ChatDbHost=${ChatDbHost}
+      - ChatDbDatabase=${ChatDbDatabase}
+      - ChatDbUser=${ChatDbUser}
+      - ChatDbPassword=${ChatDbPassword}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
+      - AI_MODERATION_API_KEY=${AI_MODERATION_API_KEY}
+      - proxy=${proxy}
+    volumes:
+      - ./scatterbox.dev:/app
+      - /var/Site-resources/logs/scatterbox.dev:/var/Site-resources/logs/scatterbox.dev
+      - ./requirements.txt:/app/requirements.txt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.main-app.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.services.main-app.loadbalancer.server.port=3001"
+
+  main-app-2:
+    <<: *main-app
+
+  main-app-3:
+    <<: *main-app
+
+  gelblaster:
+    build:
+      context: .
+      dockerfile: gelblast.scatterbox.dev/Dockerfile
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - ./gelblast.scatterbox.dev:/app
+      - sqlite_data:/app/instance
+      - ./requirements.txt:/app/requirements.txt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gelblaster.rule=Host(`gelblast.${DOMAIN}`)"
+      - "traefik.http.services.gelblaster.loadbalancer.server.port=3004"
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DBPASSWORD}
+      - MYSQL_DATABASE=${DBDATABASE}
+      - MYSQL_USER=${DBUSER}
+      - MYSQL_PASSWORD=${DBPASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  traefik:
+    image: traefik:v2.5
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.dashboard.address=:8080"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=dashboard"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+
+volumes:
+  mysql_data:
+  sqlite_data:
