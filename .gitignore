@@ -20,3 +20,5 @@ file_storage.scatterbox.dev
 gelblast.scatterbox.dev/instance
 
 .env
+
+venv
