@@ -17,7 +17,7 @@ services:
     labels:
       - "traefik.http.routers.main-app.rule=Host(`scatterbox.dev`)"
       - "traefik.http.services.gelblaster.loadbalancer.server.port=3001"
-    scale: 3
+    scale: 5
 
   gelblaster:
     build:
@@ -35,20 +35,6 @@ services:
     labels:
       - "traefik.http.routers.gelblaster.rule=Host(`gelblast.scatterbox.dev`)"
       - "traefik.http.services.gelblaster.loadbalancer.server.port=3004"
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DBPASSWORD}
-      - MYSQL_DATABASE=${DBDATABASE}
-      - MYSQL_USER=${DBUSER}
-      - MYSQL_PASSWORD=${DBPASSWORD}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   traefik:
     image: traefik:v3.2
