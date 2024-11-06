@@ -1,9 +1,12 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
+# Initialize SQLAlchemy without creating an instance here
 db = SQLAlchemy()
 
 class Battle(db.Model):
+    __tablename__ = 'battles'  # Explicitly define table name for clarity
+
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(20), nullable=False)
     team_a_name = db.Column(db.String(100), nullable=False)
@@ -33,3 +36,10 @@ class Battle(db.Model):
             'timestamp': self.created_at.isoformat(),
             'winner': self.winner
         }
+
+def init_app(app):
+    """Initialize the SQLAlchemy instance with the Flask app."""
+    db.init_app(app)
+    
+    with app.app_context():
+        db.create_all()

@@ -1,8 +1,8 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
-from models import db, Battle
+from models import db, Battle, init_app
 from dotenv import load_dotenv
 from flask_cors import CORS
 
@@ -15,7 +15,9 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 # Configure database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///battles.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+
+# Initialize the database with the app
+init_app(app)
 
 # Admin credentials
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
@@ -295,10 +297,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html', error=str(e)), 500
-
-# Create database tables
-with app.app_context():
-    db.create_all()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3004)
