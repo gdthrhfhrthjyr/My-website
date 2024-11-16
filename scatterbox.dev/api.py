@@ -50,11 +50,11 @@ def ensure_encryption_key(file_path):
             file.write(key)
 
 # Define paths to necessary files
-ENCRYPTION_KEY_FILE = '../../Site-resources/Encryption/Encryption.key'
-CHAT_ENCRYPTION_KEY_FILE = '../../Site-resources/Encryption/Chat_Encryption.key'
-MAINTENANCE_FILE = '../../Site-resources/json/scatterbox.dev/maintenance.json'
-BANNED_IPS_FILE = '../../Site-resources/json/scatterbox.dev/banned_ips.json'
-LOCKED_ACCOUNTS_FILE = '../../Site-resources/json/scatterbox.dev/locked_accounts.json'
+ENCRYPTION_KEY_FILE = '/var/Site-resources/Encryption/Encryption.key'
+CHAT_ENCRYPTION_KEY_FILE = '/var/Site-resources/Encryption/Chat_Encryption.key'
+MAINTENANCE_FILE = '/var/Site-resources/json/scatterbox.dev/maintenance.json'
+BANNED_IPS_FILE = '/var/Site-resources/json/scatterbox.dev/banned_ips.json'
+LOCKED_ACCOUNTS_FILE = '/var/Site-resources/json/scatterbox.dev/locked_accounts.json'
 
 # Ensure necessary files exist
 ensure_encryption_key(ENCRYPTION_KEY_FILE)
@@ -63,21 +63,21 @@ ensure_file_exists(MAINTENANCE_FILE, default_content={'maintenance_mode': False}
 ensure_file_exists(BANNED_IPS_FILE, default_content={})
 ensure_file_exists(LOCKED_ACCOUNTS_FILE, default_content={})
 
-with open('../../Site-resources/Encryption/Encryption.key', 'rb') as key_file:
+with open('/var/Site-resources/Encryption/Encryption.key', 'rb') as key_file:
     key = key_file.read()
 fernet = Fernet(key)
 
-with open('../../Site-resources/Encryption/Chat_Encryption.key', 'rb') as key_file:
+with open('/var/Site-resources/Encryption/Chat_Encryption.key', 'rb') as key_file:
     key = key_file.read()
 fernet_chat = Fernet(key)
 
-public_folder = '../../sites/scatterbox.dev/html'
+public_folder = '/var/sites/scatterbox.dev/html'
 
 app = Flask('app')
 CORS(app)
 
 # Define the path to the JSON file
-MAINTENANCE_FILE = '../../Site-resources/json/scatterbox.dev/maintenance.json'
+MAINTENANCE_FILE = '/var/Site-resources/json/scatterbox.dev/maintenance.json'
 
 app.secret_key = os.environ.get('SECRET_KEY')
 blocked_ips = [
