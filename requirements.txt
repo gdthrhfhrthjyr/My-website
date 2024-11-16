@@ -1,0 +1,29 @@
+# Combined requirements.txt for scatterbox.dev and gelblast.scatterbox.dev
+
+# Web Framework
+Flask==2.2.5
+
+# Database
+mysql-connector-python==9.1.0
+Flask-SQLAlchemy==2.5.1
+
+# Server
+gunicorn==22.0.0
+
+# Security
+bcrypt==3.2.0
+pyotp==2.6.0
+cryptography==43.0.1
+
+# Image Processing
+qrcode==7.3.1
+Pillow==10.3.0
+
+# HTTP Requests
+requests==2.32.2
+
+# Environment Variables
+python-dotenv==0.19.2
+
+# CORS
+flask-cors==4.0.2

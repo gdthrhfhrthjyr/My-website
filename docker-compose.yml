@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  main-app:
+    build:
+      context: .
+      dockerfile: scatterbox.dev/Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: scatterbox:latest
+    volumes:
+      - ./scatterbox.dev:/app
+      - /var:/var
+      - ./requirements.txt:/app/requirements.txt
+    labels:
+      - "traefik.http.routers.main-app.rule=Host(`scatterbox.dev`)"
+      - "traefik.http.services.main-app.loadbalancer.server.port=3001"
+
+  gelblaster:
+    build:
+      context: .
+      dockerfile: gelblast.scatterbox.dev/Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: gelblaster:latest
+    volumes:
+      - ./gelblast.scatterbox.dev:/app
+      - sqlite_data:/app/instance
+      - ./requirements.txt:/app/requirements.txt
+      - /var:/var
+    labels:
+      - "traefik.http.routers.gelblaster.rule=Host(`gelblast.scatterbox.dev`)"
+      - "traefik.http.services.gelblaster.loadbalancer.server.port=3004"
+
+  traefik:
+    image: traefik:v3.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.scatterbox.dev`)"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080/api/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql_data:
+  sqlite_data:
