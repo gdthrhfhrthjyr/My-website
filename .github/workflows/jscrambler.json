@@ -1,0 +1,61 @@
+{
+  "keys": {
+    "accessKey": "01612C0336E0B645F82170A8251263682EE9341B",
+    "secretKey": "446FEA1B12B3BA8D2A0FC1B5D38F136A649161E8"
+  },
+  "applicationId": "67404cc7cc2ad714013234b9",
+  "jscramblerVersion": "8.3",
+  "areSubscribersOrdered": false,
+  "useRecommendedOrder": true,
+  "tolerateMinification": true,
+  "profilingDataMode": "off",
+  "useAppClassification": true,
+  "browsers": {},
+  "sourceMaps": false,
+  "params": [
+    {
+      "name": "selfDefending"
+    },
+    {
+      "name": "objectPropertiesSparsing"
+    },
+    {
+      "name": "variableMasking"
+    },
+    {
+      "name": "whitespaceRemoval"
+    },
+    {
+      "name": "identifiersRenaming",
+      "options": {
+        "mode": "SAFEST"
+      }
+    },
+    {
+      "name": "globalVariableIndirection"
+    },
+    {
+      "name": "dotToBracketNotation"
+    },
+    {
+      "name": "stringConcealing"
+    },
+    {
+      "name": "functionReordering"
+    },
+    {
+      "name": "propertyKeysObfuscation",
+      "options": {
+        "encoding": [
+          "hexadecimal"
+        ]
+      }
+    },
+    {
+      "name": "regexObfuscation"
+    },
+    {
+      "name": "booleanToAnything"
+    }
+  ]
+}
