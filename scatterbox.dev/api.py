@@ -25,7 +25,8 @@ import base64
 import random
 import string
 import datetime
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
+import cryptography
 import pyotp
 import qrcode
 import io
@@ -103,7 +104,6 @@ def load_json(file_path):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             return json.load(file)
-    return {}
 
 def save_json(file_path, data):
     with open(file_path, 'w') as file:
@@ -932,7 +932,7 @@ def mfa_login():
     user_info = convert_to_boolean(user_info, ['moderator'])
     try:
         decrypted_token = fernet.decrypt(token.encode()).decode()
-    except cryptography.fernet.InvalidToken:
+    except InvalidToken:
         return {"message": "Failed to decrypt token"}, 500
 
     return {
@@ -1031,7 +1031,7 @@ def login():
     user_info = convert_to_boolean(user_info, ['moderator'])
     try:
         decrypted_token = fernet.decrypt(token.encode()).decode()
-    except cryptography.fernet.InvalidToken:
+    except InvalidToken:
         return {"message": "Failed to decrypt token"}, 500
 
     return {
